@@ -1,16 +1,20 @@
-# This is a sample Python script.
+import pysam
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+file = pysam.AlignmentFile('s7510_S483_L002_001.mapped.sorted.bam', "rb")
+iter = file.pileup()
+mystring = ''
+mylist = []
+for pileupcol in file.pileup():
+    mystring = ''
+    for pileupread in pileupcol.pileups:
+        if not pileupread.is_del and not pileupread.is_refskip:
+            mystring = mystring + pileupread.alignment.query_sequence[pileupread.query_position]
+
+    mystring = "".join(sorted(list(mystring)))
+    mylist.append((pileupcol.pos+1, mystring))
+    for (k, v) in mylist:
+        print("{}: {}".format(k, len(v)))
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+for (k, v) in mylist:
+    print("{}: {}".format(k, len(v)))
