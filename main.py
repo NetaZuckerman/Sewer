@@ -38,4 +38,4 @@ for position in MTpileup:
     df_pysam.loc[position.reference_pos+1] = pd.Series(c)
 
 file.close
-print(c)
+print(df_pysam)
