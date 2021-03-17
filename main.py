@@ -11,7 +11,7 @@ for pileupcol in file.pileup():
     for pileupread in pileupcol.pileups:
         if not pileupread.is_del and not pileupread.is_refskip:
             pos = pileupread.query_position
-            print(pos)
+            # print(pos)
             if pileupread.alignment.query_sequence[pos] not in positions_dict[pos]:
                 positions_dict[pos][pileupread.alignment.query_sequence[pos]] = 0
             positions_dict[pos][pileupread.alignment.query_sequence[pos]] += 1
