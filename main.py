@@ -24,6 +24,7 @@ iter = file.pileup()
 #     # mylist.append((pileupcol.pos+1, mystring))
 #     #
 # print(positions_dict)
+
 df_pysam = pd.DataFrame(np.zeros(shape=(29903, 5)), columns=['C', 'A', 'G', 'T', 'isindel'], index=list(range(29903)))
 
 MTpileup = file.pileup(stepper='nofilter')
