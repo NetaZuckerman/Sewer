@@ -16,21 +16,21 @@ load("results/mat_MutsByGene.RData")
 
 #### align (augur's mafft)
 cd /Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/Sewer_routine/Feb2021
-
-augur align \
---sequences alignment/Feb2021.fasta \
---reference-sequence /Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/refs/REF_NC_045512.2.fasta \
---output alignment/Feb2021_aligned.fasta 
+# in BASH:
+# augur align \
+# --sequences alignment/Feb2021.fasta \
+# --reference-sequence /Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/refs/REF_NC_045512.2.fasta \
+# --output alignment/Feb2021_aligned.fasta
 
 
 
 #### Import & arrange ALIGNED sequences ####
-multAlign = read.fasta(file="alignment/Feb2021_aligned.fasta", seqtype="DNA")
-multAlignNames = names(multAlign)
+multAlign <- read.fasta(file="alignment/Feb2021_aligned.fasta", seqtype="DNA")
+multAlignNames <- names(multAlign)
 
-NucList = list()  #put sequences in list
+NucList <- list()  #put sequences in list
 for (i in 1:length(multAlign)){ NucList[[i]] = multAlign[[i]]}
-names(NucList) = multAlignNames
+names(NucList) <- multAlignNames
 save(NucList,file="results/NucList.RData")
 
 NucMat = matrix(NA,nrow=length(NucList),ncol=length(NucList[[1]])); rownames(NucMat)=names(NucList); colnames(NucMat)=c(1:length(NucList[[1]]))
