@@ -1,6 +1,6 @@
 import pysam
 
-file = pysam.AlignmentFile('s7510_S483_L002_001.mapped.sorted.bam', "rb")
+file = pysam.AlignmentFile('s6519_Ashdod_Jan1.mapped.sorted.bam', "rb")
 
 iter = file.pileup()
 positions_dict = {i: dict() for i in range(1, 29903)}
