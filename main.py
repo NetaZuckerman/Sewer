@@ -3,7 +3,7 @@ import pysam
 file = pysam.AlignmentFile('s6519_Ashdod_Jan1.mapped.sorted.bam', "rb")
 
 iter = file.pileup()
-positions_dict = {i: dict() for i in range(1, 29903)}
+positions_dict = {i: dict() for i in range(0, 29903)}
 mystring = ''
 mylist = []
 for pileupcol in file.pileup():
