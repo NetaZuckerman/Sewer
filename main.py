@@ -26,7 +26,7 @@ iter = file.pileup()
 # print(positions_dict)
 df_pysam = pd.DataFrame(np.zeros(shape=(29903, 5)), columns=['C', 'A', 'G', 'T', 'isindel'], index=list(range(29903)))
 
-MTpileup = file.pileup('MT', stepper='nofilter')
+MTpileup = file.pileup(stepper='nofilter')
 for position in MTpileup:
     c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'isindel': 0})
     for pileupread in position.pileups:
