@@ -17,7 +17,8 @@ for position in pileup_iter:
             c['isindel'] += 1
     df_pysam.loc[position.reference_pos+1] = pd.Series(c)
 
-df_pysam.to_csv("pileup.csv", index=False)  # temporary file
+df_pysam.index.name = 'pos'
+df_pysam.to_csv("pileup.csv")  # temporary file
 
 # create lineages list
 uniq_lineages = set()
