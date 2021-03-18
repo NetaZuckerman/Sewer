@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 file = pysam.AlignmentFile('s6519_Ashdod_Jan1.mapped.sorted.bam', "rb")
-df_pysam = pd.DataFrame(np.zeros(shape=(29903, 5)), columns=['pos','C', 'A', 'G', 'T', 'isindel'], index=list(range(29903)))
+df_pysam = pd.DataFrame(np.zeros(shape=(29903, 6)), columns=['pos','C', 'A', 'G', 'T', 'isindel'], index=list(range(29903)))
 muttable = pd.read_csv("novelMutTable.csv")
 
 pileup_iter = file.pileup(stepper='nofilter')
