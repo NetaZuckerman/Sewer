@@ -18,6 +18,7 @@ for position in pileup_iter:
     df_pysam.loc[position.reference_pos+1] = pd.Series(c)
 
 df_pysam.index.name = 'pos'
+df_pysam['sum'] = df_pysam['A'] + df_pysam['C'] + df_pysam['T'] + df_pysam['G'] + df_pysam['isindel']
 df_pysam.to_csv("pileup.csv")  # temporary file
 
 # create lineages list
