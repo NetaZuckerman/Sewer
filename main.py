@@ -9,12 +9,12 @@ muttable = pd.read_csv("novelMutTable.csv")
 
 pileup_iter = file.pileup(stepper='nofilter')
 for position in pileup_iter:
-    c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'isindel': 0})
+    c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'del': 0})
     for pileupread in position.pileups:
         if not pileupread.is_del and not pileupread.is_refskip:
             c[pileupread.alignment.query_sequence[pileupread.query_position].upper()] += 1
-        if pileupread.indel:
-            c['isindel'] += 1
+        if pileupread.indel < 0:
+            c['del'] += 1
     df_pysam.loc[position.reference_pos+1] = pd.Series(c)
 
 df_pysam.index.name = 'pos'
