@@ -13,7 +13,7 @@ for position in pileup_iter:
     for pileupread in position.pileups:
         if not pileupread.is_del and not pileupread.is_refskip:
             c[pileupread.alignment.query_sequence[pileupread.query_position].upper()] += 1
-        if pileupread.indel < 0:
+        if pileupread.is_del:
             c['del'] += 1
     df_pysam.loc[position.reference_pos+1] = pd.Series(c)
 
