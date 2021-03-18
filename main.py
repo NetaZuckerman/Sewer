@@ -15,7 +15,7 @@ for position in pileup_iter:
             c[pileupread.alignment.query_sequence[pileupread.query_position].upper()] += 1
         if pileupread.indel:
             c['isindel'] += 1
-    df_pysam.loc[position.reference_pos+1] = pd.Series(c)
+    df_pysam.loc[position.reference_pos+1] = pd.Series([position] + c)
 
 df_pysam.to_csv("pileup.csv")  # temporary file
 
