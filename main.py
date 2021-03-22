@@ -30,4 +30,9 @@ for lin in muttable.lineage:
 # create dictionary: {lineage: muttable} (mutations table df for each lineage)
 muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
 
-# now theres a pileup dataframe. group by position, calculate sum
+for lin, table in muttable_by_lineage.items():
+    for pos in table.pos:
+        pos_freq = df_pysam[df_pysam.pos == pos]
+
+
+
