@@ -44,7 +44,8 @@ if __name__ == '__main__':
 
     all_tables = []
     # get BAM location and iterate through it
-    files_list = glob.glob('*.mapped.sorted.bam')
+    files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
+
     for file in files_list:
         pileup_table = pd.DataFrame(np.zeros(shape=(29903, 5)), columns=['C', 'A', 'G', 'T', 'del'],
                                     index=list(range(29903)))
