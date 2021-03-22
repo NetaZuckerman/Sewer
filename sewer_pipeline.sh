@@ -1,0 +1,1 @@
+# iterate over all BAM files (mapped and sorted) and pass through script.?
