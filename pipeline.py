@@ -40,6 +40,9 @@ if __name__ == '__main__':
         for x in lin.split(','):
             uniq_lineages.add(x.strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
+    for lin, table in muttable_by_lineage.items():
+        table.lineage = lin
+
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
 
     all_tables = []
