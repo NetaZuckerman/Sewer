@@ -23,10 +23,10 @@ def frequency(mut_val, pos, pileup_df):
     total = pileup_df.loc[pos-1]['sum']
     if total:
         count = pileup_df.loc[pos-1][mut_val]
-        if count < 5:
+        if count > 5:
             val = (count / total) * 100
-            if val < 1:
-                val = 0.0
+        else:
+            val = 0.0
     else:
         val = 0.0
     return val
