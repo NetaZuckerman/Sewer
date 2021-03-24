@@ -20,11 +20,16 @@ def frequency(mut_val, pos, pileup_df):
     :return: frequency of mutation nucleotide in position (mut_depth/sum*100)
     """
     mut_val = 'del' if mut_val == '-' else mut_val
-    if pileup_df.loc[pos-1]['sum']:
-        val = pileup_df.loc[pos-1][mut_val] / pileup_df.loc[pos-1]['sum']
+    total = pileup_df.loc[pos-1]['sum']
+    if total:
+        count = pileup_df.loc[pos-1][mut_val]
+        if count < 5:
+            val = (count / total) * 100
+            if val < 1:
+                val = 0.0
     else:
         val = 0.0
-    return val*100
+    return val
 
 # TODO: is there a faster way of pileup?
 
@@ -50,16 +55,16 @@ if __name__ == '__main__':
     files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
 
     for file in files_list:
-        pileup_table = pd.DataFrame(np.zeros(shape=(29903, 5)), columns=['C', 'A', 'G', 'T', 'del'],
+        pileup_table = pd.DataFrame(np.zeros(shape=(29903, 6)), columns=['C', 'A', 'G', 'T',  'N', 'del'],
                                     index=list(range(29903)))
         bam = pysam.AlignmentFile(file, 'rb')
         pileup_iter = bam.pileup(stepper='nofilter')
         for position in pileup_iter:
-            c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'del': 0})
+            c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'N': 0, 'del': 0})
             for pileupread in position.pileups:
-                if not pileupread.is_del and not pileupread.is_refskip:
+                if not pileupread.is_del:
                     c[pileupread.alignment.query_sequence[pileupread.query_position].upper()] += 1
-                if pileupread.is_del:
+                elif pileupread.is_del:
                     c['del'] += 1
             pileup_table.loc[position.reference_pos + 1] = pd.Series(c)
         pileup_table.index.name = 'pos'
@@ -67,8 +72,9 @@ if __name__ == '__main__':
                               pileup_table['del']
 
         all_tables.append(pileup_table)
-        file_name = file.strip('.mapped.sorted.bam')
+        file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table), axis=1)
 
+    final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
     final_df.to_csv(out_file)
 
