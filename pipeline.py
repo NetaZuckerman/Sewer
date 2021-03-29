@@ -82,6 +82,7 @@ if __name__ == '__main__':
                               pileup_table['del'] + pileup_table['N']
 
         pileup_table['ref'] = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])  # spread refseq sequence by position
+        pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
         pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
