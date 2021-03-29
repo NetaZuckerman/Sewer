@@ -100,7 +100,7 @@ if __name__ == '__main__':
         table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | table['N_freq'] > 99].index
         table = table.drop(index=indexNames, columns=['N_freq'])
-        table.to_csv('results/mutationsPileups'+name+'.csv', index=False)
+        table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
 
 
 
