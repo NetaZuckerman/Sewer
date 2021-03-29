@@ -38,6 +38,7 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
 
 
 if __name__ == '__main__':
+    all_tables = {}
     muttable = pd.read_csv("novelMutTable.csv")
     uniq_lineages = set()
     for lin in muttable.lineage:
@@ -54,7 +55,15 @@ if __name__ == '__main__':
         lambda row: (row[row['ref']] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
 
     final_df['file_name'] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, 5), axis=1)
+    all_tables['file_name'] = pileup_table
 
+    for name, table in all_tables.items():
+        # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
+        table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        # indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | table['N_freq'] > 99].index
+        indexNames = table[(table['ref_freq'] > 99) | (table['sum'] < 10) | (table['N_freq'] > 99)].index
+        table = table.drop(index=indexNames, columns=['N_freq'])
+        table.to_csv('example.csv', index=False)
 
 
 

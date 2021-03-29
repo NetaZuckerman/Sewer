@@ -98,7 +98,7 @@ if __name__ == '__main__':
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
         table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
-        indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | table['N_freq'] > 99].index
+        indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
         table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
 
