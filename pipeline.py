@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, min_depth), axis=1)
+        final_df[file_name] = pileup_table.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, min_depth), axis=1)
 
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
     final_df.to_csv(out_file)
