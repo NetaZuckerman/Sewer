@@ -55,7 +55,9 @@ if __name__ == '__main__':
 
     final_df['file_name'] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, 5), axis=1)
 
-    table['1'] = 3
+    for x in final_df:
+        print(x)
+
 
 
 

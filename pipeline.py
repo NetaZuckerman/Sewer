@@ -25,9 +25,9 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     :return: frequency of mutation nucleotide in position (mut_depth/sum*100)
     """
     mut_val = 'del' if mut_val == '-' else mut_val
-    total = pileup_df.loc[pos-1]['sum']
+    total = pileup_df.loc[pos]['sum']
     if total:
-        count = pileup_df.loc[pos-1][mut_val]
+        count = pileup_df.loc[pos][mut_val]
         if count > depth_threshold:
             freq = (count / total) * 100
         else:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        final_df[file_name] = pileup_table.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, min_depth), axis=1)
+        final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, min_depth), axis=1)
 
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
     final_df.to_csv(out_file)
