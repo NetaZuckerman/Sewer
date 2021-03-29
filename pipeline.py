@@ -62,7 +62,7 @@ if __name__ == '__main__':
     files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
     # iterate all bam files:
     for file in files_list:
-        pileup_table = pd.DataFrame(columns=['C', 'A', 'G', 'T',  'N', 'del'],
+        pileup_table = pd.DataFrame(np.zeros(shape=(29903, 6)), columns=['C', 'A', 'G', 'T',  'N', 'del'],
                                     index=list(range(29903)))
         bam = pysam.AlignmentFile(file, 'rb')
         pileup_iter = bam.pileup(stepper='nofilter')
