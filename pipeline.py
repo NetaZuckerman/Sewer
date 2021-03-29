@@ -26,11 +26,9 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     :return: frequency of mutation nucleotide in position (mut_depth/sum*100)
     """
     mut_val = 'del' if mut_val == '-' else mut_val
-    # total = pileup_df.loc[pos]['sum']
-    total = pileup_df.loc[pileup_df['pos' == pos]]['sum']
+    total = pileup_df.loc[pos]['sum']
     if total:
-        # count = pileup_df.loc[pos][mut_val]
-        count = pileup_df.loc[pileup_df['pos' == pos]][mut_val]
+        count = pileup_df.loc[pos][mut_val]
         if count > depth_threshold:
             freq = (count / total) * 100
         else:
