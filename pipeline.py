@@ -75,7 +75,7 @@ if __name__ == '__main__':
                     c['del'] += 1
                 elif pileupread.is_refskip:  # N?
                     c['N'] += 1
-            pileup_table.loc[position.reference_pos + 1] = pd.Series(c)
+            pileup_table.loc[position.reference_pos] = pd.Series(c)
         # produce pileup table(for each bam): pos,A,C,T,G,N,del,totaldepth,
         pileup_table.index.name = 'pos'
         pileup_table['sum'] = pileup_table['A'] + pileup_table['C'] + pileup_table['T'] + pileup_table['G'] + \
