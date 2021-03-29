@@ -63,6 +63,7 @@ if __name__ == '__main__':
         # indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | table['N_freq'] > 99].index
         indexNames = table[(table['ref_freq'] > 99) | (table['sum'] < 10) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
+        table.reset_index(level=0, inplace=True)
         table.to_csv('example.csv', index=False)
 
 
