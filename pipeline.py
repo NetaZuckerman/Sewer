@@ -18,6 +18,7 @@ calculate mutations frequencies by pileup files.
 def frequency(mut_val, pos, pileup_df, depth_threshold):
     """
     return frequency of mut_val base in specified position.
+    :type pos: object
     :param mut_val: mutation nucleotide (A,C,T,G,-)
     :param pos: position
     :param pileup_df: the pileup dataframe
@@ -25,9 +26,11 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     :return: frequency of mutation nucleotide in position (mut_depth/sum*100)
     """
     mut_val = 'del' if mut_val == '-' else mut_val
-    total = pileup_df.loc[pos]['sum']
+    # total = pileup_df.loc[pos]['sum']
+    total = pileup_df.loc[pileup_df['pos' == pos]]['sum']
     if total:
-        count = pileup_df.loc[pos][mut_val]
+        # count = pileup_df.loc[pos][mut_val]
+        count = pileup_df.loc[pileup_df['pos' == pos]][mut_val]
         if count > depth_threshold:
             freq = (count / total) * 100
         else:
@@ -61,7 +64,7 @@ if __name__ == '__main__':
     files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
     # iterate all bam files:
     for file in files_list:
-        pileup_table = pd.DataFrame(np.zeros(shape=(29903, 6)), columns=['C', 'A', 'G', 'T',  'N', 'del'],
+        pileup_table = pd.DataFrame(columns=['C', 'A', 'G', 'T',  'N', 'del'],
                                     index=list(range(29903)))
         bam = pysam.AlignmentFile(file, 'rb')
         pileup_iter = bam.pileup(stepper='nofilter')
