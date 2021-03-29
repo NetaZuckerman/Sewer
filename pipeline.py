@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # inputs
     bam_dir = argv[1]
     out_file = argv[2]
-    min_depth = argv[3]
+    min_depth = int(argv[3])
     refseq_path = argv[4]
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
     muttable = pd.read_csv("novelMutTable.csv")  # TODO: get from other location!
