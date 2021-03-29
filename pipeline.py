@@ -5,6 +5,7 @@ import numpy as np
 from sys import argv
 import glob
 import os
+import errno
 """
 for sewer samples.
 iterate over mapped and sorted bam files,
@@ -93,7 +94,13 @@ if __name__ == '__main__':
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
     final_df.to_csv(out_file)
 
-    os.makedirs('results/mutationsPileups')
+    try:
+        os.makedirs('results/mutationsPileups')
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            print("directory results/mutationsPileups already exists, continuing.")
+        else:
+            raise
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
