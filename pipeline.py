@@ -35,7 +35,7 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
         else:
             freq = 0.0
     else:
-        freq = 0.0
+        freq = None
     return freq
 
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
     # iterate all bam files:
     for file in files_list:
-        pileup_table = pd.DataFrame(np.zeros(shape=(29903, 6)), columns=['C', 'A', 'G', 'T',  'N', 'del'],
+        pileup_table = pd.DataFrame(np.empty(shape=(29903, 6))*np.nan, columns=['C', 'A', 'G', 'T',  'N', 'del'],
                                     index=list(range(29903)))
         bam = pysam.AlignmentFile(file, 'rb')
         pileup_iter = bam.pileup(stepper='nofilter')
@@ -109,6 +109,11 @@ if __name__ == '__main__':
         table = table.drop(index=indexNames, columns=['N_freq'])
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
+
+    # create another surveillance table
+    surv_table = pd.DataFrame()
+    # for lineage table: calculate mean frequency for each lineage
+    # pull mutation frequency from results/variants.csv??
 
 
 

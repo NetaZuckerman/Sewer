@@ -6,7 +6,7 @@
 
 
 #### Setup ####
-setwd("/Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/Sewer_routine/Feb2021")
+# setwd("/Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/Sewer_routine/Feb2021")
 library(msa); library(seqinr); library(ggplot2); library(stringdist); library(reshape2)
 load("/Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/refs/StartEndRegions.RData")
 load("results/puList.RData")
@@ -25,7 +25,7 @@ cd /Users/netazuck/Documents/projects/Michal/CoronaVirus/data/Sewer/Sewer_routin
 
 
 #### Import & arrange ALIGNED sequences ####
-multAlign <- read.fasta(file="alignment/Feb2021_aligned.fasta", seqtype="DNA")
+multAlign <- read.fasta(file="alignment/sewer_aligned.fasta", seqtype="DNA")
 multAlignNames <- names(multAlign)
 
 NucList <- list()  #put sequences in list
@@ -46,33 +46,36 @@ save(NucMat,file="results/NucMat.RData")
 library(Rsamtools)
 
 ## read bam files one by one into the pu_# object and the make a list of all (do this once and then load the puList.RData)
-bamfile = "BAM/s-7356_ShafdanJan2021.mapped.sorted.bam"  
+bamfile = "BAM/6287-s_S29_L001_001.mapped.sorted.bam"
 bf = BamFile(bamfile)
 p_param = PileupParam(max_depth=10000,distinguish_strands=F,min_mapq=20)
 #param = ScanBamParam(which=GRanges("chr17",IRanges(start=685640, end=685640)))
-pu_7356 = pileup(bf,pileupParam=p_param)
+# pu_7356 = pileup(bf,pileupParam=p_param)
+pu_6287 = pileup(bf, pileupParam = p_param)
 #pu[pu$pos==11083,]
 
-puList_new = list(puList[[1]],puList[[2]],puList[[3]],puList[[4]],puList[[5]],puList[[6]],      #beer-sheva
-                  puList[[7]],puList[[8]],puList[[9]],puList[[10]],puList[[11]],puList[[12]],   #ashdod
-                  puList[[13]],puList[[14]],puList[[15]],puList[[16]],puList[[17]],puList[[18]],#rahat
-                  puList[[19]],puList[[20]],puList[[21]],puList[[22]],puList[[23]],             #jer-sor
-                  puList[[24]],puList[[25]],puList[[26]],puList[[27]],puList[[28]],pu_7356,     #shafdan
-                  puList[[30]],puList[[31]],puList[[32]],puList[[33]],puList[[34]],             #natanya
-                  puList[[35]],puList[[36]],puList[[37]],puList[[38]],puList[[39]],puList[[40]],#haifa
-                  puList[[41]],puList[[42]],puList[[43]],puList[[44]],puList[[45]],             #tzfat
-                  puList[[46]],puList[[47]],puList[[48]],puList[[49]],puList[[50]])             #el-hamra
+# puList_new = list(puList[[1]],puList[[2]],puList[[3]],puList[[4]],puList[[5]],puList[[6]],      #beer-sheva
+#                   puList[[7]],puList[[8]],puList[[9]],puList[[10]],puList[[11]],puList[[12]],   #ashdod
+#                   puList[[13]],puList[[14]],puList[[15]],puList[[16]],puList[[17]],puList[[18]],#rahat
+#                   puList[[19]],puList[[20]],puList[[21]],puList[[22]],puList[[23]],             #jer-sor
+#                   puList[[24]],puList[[25]],puList[[26]],puList[[27]],puList[[28]],pu_7356,     #shafdan
+#                   puList[[30]],puList[[31]],puList[[32]],puList[[33]],puList[[34]],             #natanya
+#                   puList[[35]],puList[[36]],puList[[37]],puList[[38]],puList[[39]],puList[[40]],#haifa
+#                   puList[[41]],puList[[42]],puList[[43]],puList[[44]],puList[[45]],             #tzfat
+#                   puList[[46]],puList[[47]],puList[[48]],puList[[49]],puList[[50]])             #el-hamra
 #puList[[51]])                                                                 #hebron
+puList_new = list(pu_6287)
 
-names(puList_new) = c("BeerSheva_aug","BeerSheva_sept","BeerSheva_oct","BeerSheva_nov","BeerSheva_dec","BeerSheva_jan",
-                      "Ashdod_aug","Ashdod_sept","Ashdod_oct","Ashdod_nov","Ashdod_dec","Ashdod_jan",
-                      "Rahat_aug","Rahat_sept","Rahat_oct","Rahat_nov","Rahat_dec","Rahat_jan",
-                      "JerSor_aug","JerSor_sept","JerSor_oct","JerSor_dec","JerSor_jan",
-                      "Shafdan_aug","Shafdan_sept","Shafdan_oct","Shafdan_nov","Shafdan_dec","Shafdan_jan",
-                      "Natanya_aug","Natanya_sept","Natanya_oct","Natanya_nov","Natanya_jan",
-                      "Haifa_aug","Haifa_sept","Haifa_oct","Haifa_nov","Haifa_dec","Haifa_jan",
-                      "Tzfat_aug","Tzfat_sept","Tzfat_oct","Tzfat_dec","Tzfat_jan",
-                      "ElHamra_aug","ElHamra_sept","ElHamra_oct","ElHamra_nov","ElHamra_dec")
+# names(puList_new) = c("BeerSheva_aug","BeerSheva_sept","BeerSheva_oct","BeerSheva_nov","BeerSheva_dec","BeerSheva_jan",
+#                       "Ashdod_aug","Ashdod_sept","Ashdod_oct","Ashdod_nov","Ashdod_dec","Ashdod_jan",
+#                       "Rahat_aug","Rahat_sept","Rahat_oct","Rahat_nov","Rahat_dec","Rahat_jan",
+#                       "JerSor_aug","JerSor_sept","JerSor_oct","JerSor_dec","JerSor_jan",
+#                       "Shafdan_aug","Shafdan_sept","Shafdan_oct","Shafdan_nov","Shafdan_dec","Shafdan_jan",
+#                       "Natanya_aug","Natanya_sept","Natanya_oct","Natanya_nov","Natanya_jan",
+#                       "Haifa_aug","Haifa_sept","Haifa_oct","Haifa_nov","Haifa_dec","Haifa_jan",
+#                       "Tzfat_aug","Tzfat_sept","Tzfat_oct","Tzfat_dec","Tzfat_jan",
+#                       "ElHamra_aug","ElHamra_sept","ElHamra_oct","ElHamra_nov","ElHamra_dec")
+names(puList_new) = c("6287_test")
 puList = puList_new
 save(puList,file="results/puList.RData")
 
@@ -128,22 +131,22 @@ for (i in 1:length(puList)){
   x = x[freqPos,]
   
   #add gene info
-  gene = rep(NA,nrow(x))
-  for (j in 1:nrow(x)){
-    for (k in 1:nrow(StartEndRegions)){ 
-      if (x[j,]$pos %inrange% c(StartEndRegions[k,]$start,StartEndRegions[k,]$end)) { gene[j]=as.character(StartEndRegions[k,]$segment); break }
-    }
-  }
-  x$gene = gene
+  # gene = rep(NA,nrow(x))
+  # for (j in 1:nrow(x)){
+  #   for (k in 1:nrow(StartEndRegions)){
+  #     if (x[j,]$pos %inrange% c(StartEndRegions[k,]$start,StartEndRegions[k,]$end)) { gene[j]=as.character(StartEndRegions[k,]$segment); break }
+  #   }
+  # }
+  # x$gene = gene
   
   puList_freqPos[[i]] = x
 }
 save(puList_freqPos,file="results/puList_freqPos.RData")
-
+load('results/puList_freqPos.RData')
 
 
 #### Search freq tables - manually 
-posToSearch = 27972
+posToSearch = 29545
 
 for (i in 1:length(puList_freqPos)){
   pu = puList_freqPos[[i]]
