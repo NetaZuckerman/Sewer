@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
         pileup_table['ref'] = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])  # spread refseq sequence by position
         pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
-        pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0 if row['sum'] == 0 else None, axis=1)
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
-        table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0 if row['N']==0 else None, axis=1)
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
         table.reset_index(level=0, inplace=True)
