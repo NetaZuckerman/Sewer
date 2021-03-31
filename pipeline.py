@@ -120,12 +120,14 @@ if __name__ == '__main__':
     # calculate frequency
     lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
-    surv_table = lineage_num_muts.join(lineage_non_zero_count)
+    lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
     for name in all_tables.keys():
-        surv_table[name] /= surv_table['total'] * 100
+        lineage_freq[name] /= lineage_freq['total'] * 100
 
-    surv_table = surv_table.drop(columns='total').transpose()
-    surv_table.to_csv('results/surveillance_table.xlsx')
+    lineage_freq = lineage_freq.drop(columns='total').transpose()
+    surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
+    surv_table.to_csv('results/surveillance_table.csv')
+
 
 
 
