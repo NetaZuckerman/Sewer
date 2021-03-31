@@ -66,6 +66,12 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('example.csv', index=False)
 
-
-
-
+    final_df.to_csv("final_df.csv")
+    avg = final_df.drop('pos', axis=1).groupby('lineage').mean()
+    number_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    non_zeroes = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
+    non_zeroes = number_muts.join(non_zeroes)
+    print(non_zeroes)
+    for name in all_tables.keys():
+        non_zeroes[name] = non_zeroes[name] / non_zeroes['total'] * 100
+    print(non_zeroes.drop(columns='total').transpose())

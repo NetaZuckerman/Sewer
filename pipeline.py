@@ -39,6 +39,11 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     return freq
 
 
+def fill_surv_table(row):
+
+    return
+
+
 if __name__ == '__main__':
     # inputs
     bam_dir = argv[1]
@@ -111,12 +116,16 @@ if __name__ == '__main__':
         table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
 
     # create another surveillance table
-    surv_table = pd.DataFrame()
-    # for lineage table: calculate mean frequency for each lineage
-    # pull mutation frequency from results/variants.csv??
+    lineage_avg = final_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    # calculate frequency
+    lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
+    surv_table = lineage_num_muts.join(lineage_non_zero_count)
+    for name in all_tables.keys():
+        surv_table[name] /= surv_table['total'] * 100
 
-
-
+    surv_table = surv_table.drop(columns='total').transpose()
+    surv_table.to_csv('results/surveillance_table.xlsx')
 
 
 
