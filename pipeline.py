@@ -51,7 +51,7 @@ if __name__ == '__main__':
     min_depth = int(argv[3])
     refseq_path = argv[4]
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
-    muttable = pd.read_csv("/data/projects/Dana/covid19/novelMutTable.csv")  # TODO: get from other location!
+    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
 
     uniq_lineages = set()
     for lin in muttable.lineage:
