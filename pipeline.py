@@ -11,10 +11,7 @@ for sewer samples.
 iterate over mapped and sorted bam files,
 calculate mutations frequencies by pileup files.
 """
-# TODO: results table to calculate overall mutations frequencies.
-# TODO: for each sample: csv file of mutations positions (mutation = position total depth > 10, and mutation(not N)
-#       is > 1% frequency
-#
+
 
 def frequency(mut_val, pos, pileup_df, depth_threshold):
     """
@@ -121,6 +118,8 @@ if __name__ == '__main__':
     lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
+
+
     for name in all_tables.keys():
         lineage_freq[name] /= lineage_freq['total'] * 100
 
