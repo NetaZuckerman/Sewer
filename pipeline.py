@@ -36,18 +36,17 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     return freq
 
 
-def fill_surv_table(row):
-
-    return
-
-
 if __name__ == '__main__':
-    # inputs
+    # user input
     bam_dir = argv[1]
     out_file = argv[2]
     min_depth = int(argv[3])
     refseq_path = argv[4]
+    # preparations
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
+    # index refseq
+    pysam.faidx(refseq_path)
+    refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
     muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
 
     uniq_lineages = set()
@@ -63,6 +62,7 @@ if __name__ == '__main__':
     all_tables = {}
 
     files_list = glob.glob(bam_dir + '/*.mapped.sorted.bam')
+
     # iterate all bam files:
     for file in files_list:
         pileup_table = pd.DataFrame(np.empty(shape=(29903, 6))*np.nan, columns=['C', 'A', 'G', 'T',  'N', 'del'],
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         pileup_table['sum'] = pileup_table['A'] + pileup_table['C'] + pileup_table['T'] + pileup_table['G'] + \
                               pileup_table['del'] + pileup_table['N']
 
-        pileup_table['ref'] = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])  # spread refseq sequence by position
+        pileup_table['ref'] = refseq_series
         pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
         pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
         # add sample to table
