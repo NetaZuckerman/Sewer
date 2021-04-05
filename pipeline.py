@@ -16,7 +16,6 @@ calculate mutations frequencies by pileup files.
 def frequency(mut_val, pos, pileup_df, depth_threshold):
     """
     return frequency of mut_val base in specified position.
-    :type pos: object
     :param mut_val: mutation nucleotide (A,C,T,G,-)
     :param pos: position
     :param pileup_df: the pileup dataframe
@@ -118,7 +117,6 @@ if __name__ == '__main__':
     lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
-
 
     for name in all_tables.keys():
         lineage_freq[name] /= lineage_freq['total']/100
