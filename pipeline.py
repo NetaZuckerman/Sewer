@@ -116,7 +116,20 @@ if __name__ == '__main__':
 
         pileup_table['ref'] = refseq_series
         # pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
-        pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        pileup_table['ref_freq'] = pileup_table.apply(
+            lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        pileup_table['C_freq'] = pileup_table.apply(
+            lambda row: (row['C'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
+        pileup_table['A_freq'] = pileup_table.apply(
+            lambda row: (row['A'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
+        pileup_table['G_freq'] = pileup_table.apply(
+            lambda row: (row['G'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
+        pileup_table['T_freq'] = pileup_table.apply(
+            lambda row: (row['T'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
+        pileup_table['N_freq'] = pileup_table.apply(
+            lambda row: (row['N'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
+        pileup_table['del_freq'] = pileup_table.apply(
+            lambda row: (row['del'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
