@@ -6,6 +6,7 @@ from sys import argv
 import glob
 import os
 import errno
+import re
 """
 for sewer samples.
 iterate over mapped and sorted bam files,
@@ -33,6 +34,35 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     else:
         freq = None
     return freq
+
+
+def keysort(elem):
+    print(elem)
+    try:
+        a = re.findall('\d+|\D+', elem)
+        return int(a[1])
+    except ValueError:
+        return 0
+
+
+def sortAndTranspose(df):
+    # 'Unnamed: 0',
+    df = df.reindex(columns=[
+        'B.1.1.7 - UK avg', 'B.1.351 - SA avg', 'P.1 - Manaus avg', 'P.2 - Rio de jeneiro avg',
+        'B.1.429 - California avg',
+        'B.1.525 - Global avg', 'B.1.526 - New york avg', 'A.23.1 - Uganda avg',
+        '20C/H655Y - Brittany avg', 'B.1.1.7 - UK freq', 'B.1.351 - SA freq', 'P.1 - Manaus freq'
+        , 'P.2 - Rio de jeneiro freq', 'B.1.429 - California freq', 'B.1.525 - Global freq', 'B.1.526 - New york freq',
+        'A.23.1 - Uganda freq', '20C/H655Y - Brittany freq', 'VOI-18.02 - WHO freq', 'VUI_L452R/L1063F_Israel freq',
+        'VUI_N481K_Israel freq', 'VUI_P681H_Israel freq', 'VOI-18.02 - WHO avg', 'VUI_L452R/L1063F_Israel avg',
+        'VUI_N481K_Israel avg', 'VUI_P681H_Israel avg'])
+    df = df.transpose()
+    try:
+        df = df[sorted(df.columns, key=keysort)]
+    except:
+        print("error in columns sorting")
+    df = df.transpose()
+    return df
 
 
 if __name__ == '__main__':
@@ -85,7 +115,7 @@ if __name__ == '__main__':
                               pileup_table['del'] + pileup_table['N']
 
         pileup_table['ref'] = refseq_series
-        pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
+        # pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
         pileup_table['ref_freq'] = pileup_table.apply(lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else 0.0, axis=1)
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
@@ -102,10 +132,19 @@ if __name__ == '__main__':
             print("directory results/mutationsPileups already exists, continuing.")
         else:
             raise
+    try:
+        os.makedirs('results/fullPileups')
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            print("directory results/mutationsPileups already exists, continuing.")
+        else:
+            raise
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
         table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        table = table.dropna(thresh=3) #### new line
+        table.to_csv('results/fullPileups/' + name + '.csv')
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
         table.reset_index(level=0, inplace=True)
@@ -123,6 +162,7 @@ if __name__ == '__main__':
 
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
+    surv_table = sortAndTranspose(surv_table)
     surv_table.to_csv('results/surveillance_table.csv')
 
 

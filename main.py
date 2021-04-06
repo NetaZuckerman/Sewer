@@ -38,46 +38,4 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
 
 
 if __name__ == '__main__':
-    # all_tables = {}
-    # muttable = pd.read_csv("novelMutTable.csv")
-    # uniq_lineages = set()
-    # for lin in muttable.lineage:
-    #     for x in lin.split(','):
-    #         uniq_lineages.add(x.strip())
-    # muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
-    # for lin, table in muttable_by_lineage.items():
-    #     table.lineage = lin
-    #
-    # final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
-    #
-    # pileup_table = pd.read_csv('temp_pileuptable.csv')
-    # pileup_table['ref_freq'] = pileup_table.apply(
-    #     lambda row: (row[row['ref']] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
-    #
-    # final_df['file_name'] = final_df.apply(lambda row: frequency(row['mut'], row['pos'], pileup_table, 5), axis=1)
-    # all_tables['file_name'] = pileup_table
-    #
-    # for name, table in all_tables.items():
-    #     # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
-    #     table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
-    #     # indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | table['N_freq'] > 99].index
-    #     indexNames = table[(table['ref_freq'] > 99) | (table['sum'] < 10) | (table['N_freq'] > 99)].index
-    #     table = table.drop(index=indexNames, columns=['N_freq'])
-    #     table.reset_index(level=0, inplace=True)
-    #     table.to_csv('example.csv', index=False)
-    #
-    # final_df.to_csv("final_df.csv")
-    # avg = final_df.drop('pos', axis=1).groupby('lineage').mean()
-    # number_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
-    # non_zeroes = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
-    # non_zeroes = number_muts.join(non_zeroes)
-    # # print(non_zeroes)
-    # for name in all_tables.keys():
-    #     non_zeroes[name] = non_zeroes[name] / non_zeroes['total'] * 100
-    # final = non_zeroes.drop(columns='total').transpose()
-    # print(final)
-    # x = final.add_suffix(' freq').join(avg.transpose().add_suffix(' avg'))
-    # print(x)
-    ref_path = 'REF_NC_045512.2.fasta'
-    ref_path_2 = 'refs/REF_NC_045512.2.fasta'
-
+    pileup = pd.read_csv()
