@@ -68,9 +68,9 @@ def sortAndTranspose(df):
 if __name__ == '__main__':
     # user input
     bam_dir = argv[1]
-    out_file = argv[2]
-    min_depth = int(argv[3])
-    refseq_path = argv[4]
+    out_file = "results/monitored_mutations.csv"
+    min_depth = int(argv[2])
+    refseq_path = argv[3]
     # preparations
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
     # index refseq
@@ -136,6 +136,9 @@ if __name__ == '__main__':
         final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos']-1, pileup_table, min_depth), axis=1)
 
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
+    sortednames = sorted([x for x in final_df.columns.values if "nv" in x], key=keysort)
+    sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
+    final_df = final_df.reindex(columns=sorted_cols)
     final_df.to_csv(out_file)
 
     try:
