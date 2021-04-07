@@ -37,7 +37,6 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
 
 
 def keysort(elem):
-    print(elem)
     try:
         a = re.findall('\d+|\D+', elem)
         return int(a[1])
