@@ -68,7 +68,6 @@ def sortAndTranspose(df):
 if __name__ == '__main__':
     # user input
     bam_dir = argv[1]
-    out_file = "results/monitored_mutations.csv"
     min_depth = int(argv[2])
     refseq_path = argv[3]
     # preparations
@@ -139,7 +138,10 @@ if __name__ == '__main__':
     sortednames = sorted([x for x in final_df.columns.values if "nv" in x], key=keysort)
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
-    final_df.to_csv(out_file)
+
+    if not os.path.exists('results'):
+        os.mkdir('results/')
+    final_df.to_csv("results/monitored_mutations.csv")
 
     try:
         os.makedirs('results/mutationsPileups')
