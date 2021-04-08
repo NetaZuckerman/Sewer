@@ -77,14 +77,13 @@ if __name__ == '__main__':
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
     muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
-
+    muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)
     uniq_lineages = set()
     for lin in muttable.lineage:
         for x in lin.split(','):
             uniq_lineages.add(x.strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
-        muttable_by_lineage[lin] = table[table['type'] != 'Insertion']
         table.lineage = lin
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
@@ -118,7 +117,7 @@ if __name__ == '__main__':
         pileup_table['ref'] = refseq_series
         # pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
         pileup_table['ref_freq'] = pileup_table.apply(
-            lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else None, axis=1)
+            lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else None, axis=1)  # if not row['sum'] then no coverage at all.
         pileup_table['C_freq'] = pileup_table.apply(
             lambda row: (row['C'] / row['sum']) * 100 if row['sum'] else None, axis=1)
         pileup_table['A_freq'] = pileup_table.apply(
