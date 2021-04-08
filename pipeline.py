@@ -92,6 +92,7 @@ if __name__ == '__main__':
             uniq_lineages.add(x.strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
+        muttable_by_lineage[lin] = table[table['type'] != 'Insertion']
         table.lineage = lin
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
@@ -171,7 +172,7 @@ if __name__ == '__main__':
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
         table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
-        table = table.dropna(thresh=3) #### new line
+        table = table.dropna(thresh=3)
         table.to_csv('results/fullPileups/' + name + '.csv')
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
