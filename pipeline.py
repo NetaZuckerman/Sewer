@@ -23,17 +23,27 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     :param depth_threshold: minimum depth threshold. below that, frequency is 0.
     :return: frequency of mutation nucleotide in position (mut_depth/sum*100)
     """
+    # mut_val = 'del' if mut_val == '-' else mut_val
+    # total = pileup_df.loc[pos]['sum']
+    # if total:
+    #     count = pileup_df.loc[pos][mut_val]
+    #     if count > depth_threshold:
+    #         freq = (count / total) * 100
+    #     else:
+    #         freq = 0.0
+    # else:
+    #     freq = None
+    # return freq
+
+    # try new frequency
+    # TODO: check if changes needs to be made in avg and freq of mutations per lineage??
     mut_val = 'del' if mut_val == '-' else mut_val
     total = pileup_df.loc[pos]['sum']
-    if total:
-        count = pileup_df.loc[pos][mut_val]
-        if count > depth_threshold:
-            freq = (count / total) * 100
-        else:
-            freq = 0.0
+    if total and pileup_df.loc[pos][mut_val] > depth_threshold:
+        freq = (pileup_df.loc[pos][mut_val] / total) * 100
     else:
         freq = None
-    return freq
+    return  freq
 
 
 def keysort(elem):
@@ -134,6 +144,7 @@ if __name__ == '__main__':
         final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos']-1, pileup_table, min_depth), axis=1)
 
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
+
     sortednames = sorted([x for x in final_df.columns.values if "nv" in x], key=keysort)
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
