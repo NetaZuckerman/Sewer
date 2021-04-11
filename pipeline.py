@@ -27,7 +27,7 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     total = pileup_df.loc[pos]['sum']
     freq = None
     if total and total >= depth_threshold:
-        count = pileup_df.loc[pos][mut_val] # specific mutation frequency
+        count = pileup_df.loc[pos][mut_val]  # specific mutation frequency
         if count >= depth_threshold:
             freq = (count / total) * 100
         else:
@@ -177,10 +177,20 @@ if __name__ == '__main__':
     lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
 
+
+    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()
+    # count number of mutations in common to british variant
+    number_of_uk_common_muts = {lin: len([m for m in muttable_by_lineage[lin]['AA'] if m in uk_variant_mutations])
+                                for lin in muttable_by_lineage if lin != 'B.1.1.7 - UK'}
+    lineage_freq = lineage_freq.reset_index()
+    lineage_freq['total'] = lineage_freq.apply(lambda row: row['total'] - number_of_uk_common_muts[row['lineage']]
+                                               if row['lineage'] != 'B.1.1.7 - UK' else row['total'], axis=1)
+    print(lineage_freq)
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
         lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '\\' + lineage_freq['total'].astype(str)
 
+    lineage_freq = lineage_freq.set_index('lineage')
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
     surv_table = sortAndTranspose(surv_table)
