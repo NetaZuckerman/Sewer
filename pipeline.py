@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '/' + lineage_freq['total'].astype(int).astype(str)
+        lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '\\' + lineage_freq['total'].astype(str)
 
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
