@@ -25,14 +25,15 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     """
     mut_val = 'del' if mut_val == '-' else mut_val
     total = pileup_df.loc[pos]['sum']
-    if total:
-        count = pileup_df.loc[pos][mut_val]
-        if count > depth_threshold:
+    freq = None
+    if total and total >= depth_threshold:
+        count = pileup_df.loc[pos][mut_val] # specific mutation frequency
+        if count >= depth_threshold:
             freq = (count / total) * 100
         else:
             freq = 0.0
-    else:
-        freq = None
+            # freq = None
+
     return freq
 
 
@@ -75,6 +76,7 @@ if __name__ == '__main__':
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
     muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
+    # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit
     muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)
     uniq_lineages = set()
     for lin in muttable.lineage:
@@ -177,7 +179,7 @@ if __name__ == '__main__':
 
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        lineage_freq[name] = str(lineage_freq[name]) + "/" + str(lineage_freq['total'])
+        lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '/' + lineage_freq['total'].astype(int).astype(str)
 
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
