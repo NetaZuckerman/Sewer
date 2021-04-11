@@ -36,8 +36,6 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
     return freq
 
 
-
-
 def keysort(elem):
     try:
         a = re.findall('\d+|\D+', elem)
@@ -178,7 +176,8 @@ if __name__ == '__main__':
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
 
     for name in all_tables.keys():
-        lineage_freq[name] /= lineage_freq['total']/100
+        # lineage_freq[name] /= lineage_freq['total']/100
+        lineage_freq[name] = str(lineage_freq[name]) + "/" + str(lineage_freq['total'])
 
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
