@@ -7,6 +7,7 @@ import glob
 import os
 import errno
 import re
+
 """
 for sewer samples.
 iterate over mapped and sorted bam files,
@@ -64,6 +65,34 @@ def sortAndTranspose(df):
     return df
 
 
+def no_uk_calculate(no_uk_df, other_variants):
+    no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
+    # create another surveillance table
+    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    # calculate frequency
+    lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+        .groupby('lineage').agg(lambda x: x.ne(0).sum())
+    lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
+    return lineage_freq, lineage_avg
+
+
+def uk_calculate(uk_df, uk_variant_mutations):
+    uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
+    # create another surveillance table
+    lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    # calculate frequency
+    lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    lineage_non_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+        .groupby('lineage').agg(lambda x: x.ne(0).sum())
+    lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
+    lineage_avg = lineage_avg['B.1.1.7 - UK']
+    uk_total= lineage_freq['total']['B.1.1.7 - UK']
+    lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
+    lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
+    return lineage_freq, lineage_avg
+
+
 if __name__ == '__main__':
     # user input
     bam_dir = argv[1]
@@ -87,6 +116,10 @@ if __name__ == '__main__':
         table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
+    all_mutations = set([x for x in muttable.AA])
+    uk_variant_mutations = set(muttable_by_lineage['B.1.1.7 - UK']['AA'])  # list of mutations of uk variant
+    other_variants = all_mutations - uk_variant_mutations
+
 
     all_tables = {}
 
@@ -94,7 +127,7 @@ if __name__ == '__main__':
 
     # iterate all bam files:
     for file in files_list:
-        pileup_table = pd.DataFrame(np.empty(shape=(29903, 6))*np.nan, columns=['C', 'A', 'G', 'T',  'N', 'del'],
+        pileup_table = pd.DataFrame(np.empty(shape=(29903, 6)) * np.nan, columns=['C', 'A', 'G', 'T', 'N', 'del'],
                                     index=list(range(29903)))
         bam = pysam.AlignmentFile(file, 'rb')
         pileup_iter = bam.pileup(stepper='nofilter')
@@ -117,7 +150,8 @@ if __name__ == '__main__':
         pileup_table['ref'] = refseq_series
         # pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
         pileup_table['ref_freq'] = pileup_table.apply(
-            lambda row: (row[row['ref']] / row['sum'])*100 if row['sum'] else None, axis=1)  # if not row['sum'] then no coverage at all.
+            lambda row: (row[row['ref']] / row['sum']) * 100 if row['sum'] else None,
+            axis=1)  # if not row['sum'] then no coverage at all.
         pileup_table['C_freq'] = pileup_table.apply(
             lambda row: (row['C'] / row['sum']) * 100 if row['sum'] else None, axis=1)
         pileup_table['A_freq'] = pileup_table.apply(
@@ -133,7 +167,8 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos']-1, pileup_table, min_depth), axis=1)
+        final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'] - 1, pileup_table, min_depth),
+                                             axis=1)
 
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
 
@@ -162,32 +197,28 @@ if __name__ == '__main__':
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
-        table['N_freq'] = table.apply(lambda row: (row['N']/row['sum'])*100 if row['sum'] else 0.0, axis=1)
+        table['N_freq'] = table.apply(lambda row: (row['N'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
         table = table.dropna(thresh=3)
         table.to_csv('results/fullPileups/' + name + '.csv')
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
         table = table.drop(index=indexNames, columns=['N_freq'])
         table.reset_index(level=0, inplace=True)
-        table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
+        table.to_csv('results/mutationsPileups/' + name + '.csv', index=False)
 
-    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
-    no_uk_df = final_df.copy()
-    no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
-                        (no_uk_df.lineage == 'B.1.1.7 - UK')] # doesnt work right
-    # create another surveillance table
-    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
-    # calculate frequency
-    lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
-    lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut'])\
-        .groupby('lineage').agg(lambda x: x.ne(0).sum())
-    lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
+
+
+
+    no_uk_lineage_freq, no_uk_lineage_avg = no_uk_calculate(final_df.copy(), other_variants)
+    uk_lineage_freq, uk_lineage_avg = uk_calculate(final_df.copy(), uk_variant_mutations)
+
 
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '\\' + lineage_freq['total'].astype(str)
+        no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq['total'].astype(str)
 
-    lineage_freq = lineage_freq.set_index('lineage')
-    lineage_freq = lineage_freq.drop(columns='total').transpose()
-    surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
+    lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
+    surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
     surv_table = sortAndTranspose(surv_table)
+    surv_table['B.1.1.7 - UK avg'] = uk_lineage_avg
+    surv_table['B.1.1.7 - UK freq'] = uk_lineage_freq
     surv_table.to_csv('results/surveillance_table.csv')
