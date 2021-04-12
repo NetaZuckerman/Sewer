@@ -77,7 +77,12 @@ if __name__ == '__main__':
             uniq_lineages.add(x.strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
-        table.lineage = lin
-    final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
+        table.assign(lineage=lin)
+    final_df = pd.read_csv('monitored_mutations.csv')
     all_tables = {}
-    final_df = final_df.apply(lambda row: frequency(row['mut'], row['pos']-1, pileup_table, min_depth), axis=1)
+    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
+
+    no_uk_df = final_df.copy()
+    no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
+                        (no_uk_df.lineage == 'B.1.1.7 - UK')]
+    print(no_uk_df)

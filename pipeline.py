@@ -84,7 +84,8 @@ if __name__ == '__main__':
             uniq_lineages.add(x.strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
-        table.lineage = lin
+        # table.lineage = lin
+        table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
 
@@ -172,8 +173,8 @@ if __name__ == '__main__':
 
     uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
     no_uk_df = final_df.copy()
-    no_uk_df = no_uk_df.drop(no_uk_df[(no_uk_df['lineage'] != 'B.1.1.7 - UK') &
-                                      (no_uk_df['AA'] not in uk_variant_mutations)].index)
+    no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
+                        (no_uk_df.lineage == 'B.1.1.7 - UK')] # doesnt work right
     # create another surveillance table
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
