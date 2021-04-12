@@ -170,15 +170,15 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
 
-    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
-    no_uk_df = final_df.copy()
-    no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
-                        (no_uk_df.lineage == 'B.1.1.7 - UK')] # doesnt work right
+    # uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
+    # no_uk_df = final_df.copy()
+    # no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
+    #                     (no_uk_df.lineage == 'B.1.1.7 - UK')] # doesnt work right
     # create another surveillance table
-    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = final_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
-    lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
-    lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut'])\
+    lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    lineage_non_zero_count = final_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut'])\
         .groupby('lineage').agg(lambda x: x.ne(0).sum())
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
 
@@ -186,7 +186,6 @@ if __name__ == '__main__':
         # lineage_freq[name] /= lineage_freq['total']/100
         lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '\\' + lineage_freq['total'].astype(str)
 
-    lineage_freq = lineage_freq.set_index('lineage')
     lineage_freq = lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
     surv_table = sortAndTranspose(surv_table)

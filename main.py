@@ -65,6 +65,7 @@ def sortAndTranspose(df):
     df = df.transpose()
     return df
 
+
 if __name__ == '__main__':
     # pileup_table = pd.read_csv("Env1.csv")
     min_depth = 5
@@ -83,6 +84,5 @@ if __name__ == '__main__':
     uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
 
     no_uk_df = final_df.copy()
-    no_uk_df = no_uk_df[((~no_uk_df.AA.isin(uk_variant_mutations)) & no_uk_df.lineage != 'B.1.1.7 - UK') |
-                        (no_uk_df.lineage == 'B.1.1.7 - UK')]
+    no_uk_df = no_uk_df[~no_uk_df.AA.isin(uk_variant_mutations)]
     print(no_uk_df)
