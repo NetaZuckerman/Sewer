@@ -170,22 +170,18 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/'+name+'.csv', index=False)
 
+    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()  # list of mutations of uk variant
+    no_uk_df = final_df.copy()
+    no_uk_df = no_uk_df.drop(no_uk_df[(no_uk_df['lineage'] != 'B.1.1.7 - UK') &
+                                      (no_uk_df['AA'] not in uk_variant_mutations)].index)
     # create another surveillance table
-    lineage_avg = final_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
-    lineage_num_muts = final_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
-    lineage_non_zero_count = final_df.drop(columns=['nucleotide','AA','gene','type','pos','REF','mut']).groupby('lineage').agg(lambda x: x.ne(0).sum())
+    lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut'])\
+        .groupby('lineage').agg(lambda x: x.ne(0).sum())
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
 
-
-    uk_variant_mutations = muttable_by_lineage['B.1.1.7 - UK']['AA'].tolist()
-    # count number of mutations in common to british variant
-    number_of_uk_common_muts = {lin: len([m for m in muttable_by_lineage[lin]['AA'] if m in uk_variant_mutations])
-                                for lin in muttable_by_lineage if lin != 'B.1.1.7 - UK'}
-    lineage_freq = lineage_freq.reset_index()
-    lineage_freq['total'] = lineage_freq.apply(lambda row: row['total'] - number_of_uk_common_muts[row['lineage']]
-                                               if row['lineage'] != 'B.1.1.7 - UK' else row['total'], axis=1)
-    print(lineage_freq)
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
         lineage_freq[name] = lineage_freq[name].astype(int).astype(str) + '\\' + lineage_freq['total'].astype(str)
@@ -195,7 +191,3 @@ if __name__ == '__main__':
     surv_table = lineage_freq.add_suffix(' freq').join(lineage_avg.add_suffix(' avg'))
     surv_table = sortAndTranspose(surv_table)
     surv_table.to_csv('results/surveillance_table.csv')
-
-
-
-
