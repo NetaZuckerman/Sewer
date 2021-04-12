@@ -66,7 +66,7 @@ def sortAndTranspose(df):
     return df
 
 if __name__ == '__main__':
-    pileup_table = pd.read_csv("Env1.csv")
+    # pileup_table = pd.read_csv("Env1.csv")
     min_depth = 5
     refseq_path = "REF_NC_045512.2.fasta"
     muttable = pd.read_csv("novelMutTable.csv")

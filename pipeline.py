@@ -33,7 +33,6 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
         else:
             freq = 0.0
             # freq = None
-
     return freq
 
 
