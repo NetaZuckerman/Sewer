@@ -113,7 +113,6 @@ if __name__ == '__main__':
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
         table.lineage = lin
-       # table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
     all_mutations = set([x for x in muttable.AA])
@@ -218,6 +217,7 @@ if __name__ == '__main__':
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
+
     surv_table = sortAndTranspose(surv_table)
     surv_table['B.1.1.7 - UK avg'] = uk_lineage_avg
     surv_table['B.1.1.7 - UK freq'] = uk_lineage_freq
