@@ -68,7 +68,6 @@ def sortAndTranspose(df):
     df = df.transpose()
     return df
 
-
 def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
@@ -95,7 +94,6 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
     lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
-
 
 if __name__ == '__main__':
     # pileup_table = pd.read_csv("Env1.csv")
@@ -130,3 +128,4 @@ if __name__ == '__main__':
     surv_table['B.1.1.7 - UK avg'] = uk_lineage_avg
     surv_table['B.1.1.7 - UK freq'] = uk_lineage_freq
     surv_table.to_csv('surveillance_table.csv')
+
