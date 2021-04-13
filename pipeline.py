@@ -68,7 +68,7 @@ def sortAndTranspose(df):
 def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
-    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = no_uk_df.copy().fillna(0).drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     no_uk_df.fillna(-1, inplace=True)
@@ -82,7 +82,7 @@ def no_uk_calculate(no_uk_df, other_variants):
 def uk_calculate(uk_df, uk_variant_mutations):
     uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
     # create another surveillance table
-    lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = uk_df.copy().fillna(0).drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     uk_df.fillna(-1, inplace=True)
@@ -122,8 +122,8 @@ if __name__ == '__main__':
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
     all_mutations = set([x for x in muttable.AA])
     uk_variant_mutations = set(muttable_by_lineage['B.1.1.7 - UK']['AA'])  # list of mutations of uk variant
-    uk_variant_mutations.add('L5F')
     other_variants = all_mutations - uk_variant_mutations
+    other_variants.remove('L5F')
 
     all_tables = {}
 
