@@ -71,8 +71,10 @@ def no_uk_calculate(no_uk_df, other_variants):
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    no_uk_df.fillna(-1, inplace=True)
     lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
-        .groupby('lineage').agg(lambda x: x.ne(0).sum())
+        .groupby('lineage').agg(lambda x: x.gt(0).sum())
+    no_uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
     return lineage_freq, lineage_avg
 
@@ -83,11 +85,13 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    uk_df.fillna(-1, inplace=True)
     lineage_non_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
-        .groupby('lineage').agg(lambda x: x.ne(0).sum())
+        .groupby('lineage').agg(lambda x: x.gt(0).sum())
+    uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
     lineage_avg = lineage_avg['B.1.1.7 - UK']
-    uk_total= lineage_freq['total']['B.1.1.7 - UK']
+    uk_total = lineage_freq['total']['B.1.1.7 - UK']
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
     lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
@@ -113,13 +117,13 @@ if __name__ == '__main__':
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
         table.lineage = lin
-       # table = table.assign(lineage=lin)
+    # table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
     all_mutations = set([x for x in muttable.AA])
     uk_variant_mutations = set(muttable_by_lineage['B.1.1.7 - UK']['AA'])  # list of mutations of uk variant
+    uk_variant_mutations.add('L5F')
     other_variants = all_mutations - uk_variant_mutations
-
 
     all_tables = {}
 
@@ -178,7 +182,10 @@ if __name__ == '__main__':
 
     if not os.path.exists('results'):
         os.mkdir('results/')
-    final_df.to_csv("results/monitored_mutations.csv")
+    monitoredfile = final_df.copy()
+    monitoredfile.fillna(-1, inplace=True)
+    monitoredfile.replace(-1, "No Coverage", inplace=True)
+    monitoredfile.to_csv("results/monitored_mutations.csv")
 
     try:
         os.makedirs('results/mutationsPileups')
@@ -205,16 +212,13 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/' + name + '.csv', index=False)
 
-
-
-
     no_uk_lineage_freq, no_uk_lineage_avg = no_uk_calculate(final_df.copy(), other_variants)
     uk_lineage_freq, uk_lineage_avg = uk_calculate(final_df.copy(), uk_variant_mutations)
 
-
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq['total'].astype(str)
+        no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
+            'total'].astype(str)
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
