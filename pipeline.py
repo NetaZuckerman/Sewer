@@ -48,12 +48,13 @@ def keysort(elem):
 def sortAndTranspose(df):
     # 'Unnamed: 0',
     df = df.reindex(columns=[
-        'B.1.1.7 - UK avg', 'B.1.351 - SA avg', 'P.1 - Manaus avg', 'P.2 - Rio de jeneiro avg',
-        'B.1.429 - California avg',
-        'B.1.525 - Global avg', 'B.1.526 - New york avg', 'A.23.1 - Uganda avg',
-        '20C/H655Y - Brittany avg', 'B.1.1.7 - UK freq', 'B.1.351 - SA freq', 'P.1 - Manaus freq'
-        , 'P.2 - Rio de jeneiro freq', 'B.1.429 - California freq', 'B.1.525 - Global freq', 'B.1.526 - New york freq',
-        'A.23.1 - Uganda freq', '20C/H655Y - Brittany freq', 'VOI-18.02 - WHO freq', 'VUI_L452R/L1063F_Israel freq',
+        'B.1.1.7 - UK avg', 'B.1.1.7 - UK freq', 'B.1.351 - SA avg', 'B.1.351 - SA freq', 'P.1 - Manaus avg',
+        'P.1 - Manaus freq' 'P.2 - Rio de jeneiro avg', 'P.2 - Rio de jeneiro freq',
+        'B.1.429 - California avg', 'B.1.429 - California freq',
+        'B.1.525 - Global avg', 'B.1.525 - Global freq', 'B.1.526 - New york avg', 'B.1.526 - New york freq',
+        'A.23.1 - Uganda avg', 'A.23.1 - Uganda freq',
+        '20C/H655Y - Brittany avg', '20C/H655Y - Brittany freq',
+        'VOI-18.02 - WHO freq', 'VUI_L452R/L1063F_Israel freq',
         'VUI_N481K_Israel freq', 'VUI_P681H_Israel freq', 'VOI-18.02 - WHO avg', 'VUI_L452R/L1063F_Israel avg',
         'VUI_N481K_Israel avg', 'VUI_P681H_Israel avg'])
     df = df.transpose()
@@ -68,7 +69,7 @@ def sortAndTranspose(df):
 def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
-    lineage_avg = no_uk_df.copy().fillna(0).drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     no_uk_df.fillna(-1, inplace=True)
@@ -82,7 +83,7 @@ def no_uk_calculate(no_uk_df, other_variants):
 def uk_calculate(uk_df, uk_variant_mutations):
     uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
     # create another surveillance table
-    lineage_avg = uk_df.copy().fillna(0).drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     # calculate frequency
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     uk_df.fillna(-1, inplace=True)
@@ -218,7 +219,7 @@ if __name__ == '__main__':
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
         no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str)
+            'total'].astype(str)+"("+(no_uk_lineage_freq[name]/no_uk_lineage_freq['total'] / 100).astype(str)+")"
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
