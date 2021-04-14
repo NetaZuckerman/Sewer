@@ -94,7 +94,10 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_avg = lineage_avg['B.1.1.7 - UK']
     uk_total = lineage_freq['total']['B.1.1.7 - UK']
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
-    lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
+    #lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
+    lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " (" + round(
+        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"
+
     return lineage_freq, lineage_avg
 
 
@@ -219,7 +222,8 @@ if __name__ == '__main__':
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
         no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str)+"("+(no_uk_lineage_freq[name]/no_uk_lineage_freq['total'] / 100).astype(str)+")"
+            'total'].astype(str) + " (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
+                                               2).astype(str) + "%)"
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
