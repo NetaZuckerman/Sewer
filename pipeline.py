@@ -47,16 +47,7 @@ def keysort(elem):
 
 def sortAndTranspose(df):
     # 'Unnamed: 0',
-    df = df.reindex(columns=[
-        'B.1.1.7 - UK avg', 'B.1.1.7 - UK freq', 'B.1.351 - SA avg', 'B.1.351 - SA freq', 'P.1 - Manaus avg',
-        'P.1 - Manaus freq' ,'P.2 - Rio de jeneiro avg', 'P.2 - Rio de jeneiro freq',
-        'B.1.429 - California avg', 'B.1.429 - California freq',
-        'B.1.525 - Global avg', 'B.1.525 - Global freq', 'B.1.526 - New york avg', 'B.1.526 - New york freq',
-        'A.23.1 - Uganda avg', 'A.23.1 - Uganda freq',
-        '20C/H655Y - Brittany avg', '20C/H655Y - Brittany freq',
-        'VOI-18.02 - WHO freq', 'VUI_L452R/L1063F_Israel freq',
-        'VUI_N481K_Israel freq', 'VUI_P681H_Israel freq', 'VOI-18.02 - WHO avg', 'VUI_L452R/L1063F_Israel avg',
-        'VUI_N481K_Israel avg', 'VUI_P681H_Israel avg'])
+    df = df.reindex(columns=[x[:-1] for x in open("Lineages_ordered.txt", "r")])
     df = df.transpose()
     try:
         df = df[sorted(df.columns, key=keysort)]
