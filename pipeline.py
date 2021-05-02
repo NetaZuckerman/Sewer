@@ -47,7 +47,7 @@ def keysort(elem):
 
 def sortAndTranspose(df):
     # 'Unnamed: 0',
-    df = df.reindex(columns=[x[:-1] for x in open("Lineages_ordered.txt", "r")])
+    df = df.reindex(columns=[x[:-1] for x in open("/data/projects/Dana/scripts/Sewer/Lineages_ordered.txt", "r")])
     df = df.transpose()
     try:
         df = df[sorted(df.columns, key=keysort)]
