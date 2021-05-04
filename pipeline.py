@@ -61,7 +61,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
-    lineage_avg=round((lineage_avg),2)
+    lineage_avg=round(lineage_avg,2)
     lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
@@ -78,7 +78,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     # create another surveillance table
     lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
     lineage_avg = round(lineage_avg,2)
-    lineage_std = uk_df.drop('pos', axis=1).groupby('lineage').std().transpose()
+    lineage_std = uk_df.drop('pos', axis=1).groupby('lineage').std()
     # calculate frequency
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     uk_df.fillna(-1, inplace=True)
@@ -88,10 +88,11 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
     lineage_avg = lineage_avg['B.1.1.7 - UK']
     uk_total = lineage_freq['total']['B.1.1.7 - UK']
+    lineage_std = lineage_std.loc['B.1.1.7 - UK', :].transpose()
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
     #lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
     lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " (" + round(
-        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"#+"std= "+lineage_std.astype(str)
+        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"+"std= "+round(lineage_std,2).astype(str)
 
     return lineage_freq, lineage_avg
 
