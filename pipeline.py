@@ -69,9 +69,10 @@ def no_uk_calculate(no_uk_df, other_variants):
     lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
     lineage_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']).groupby('lineage').agg(lambda x: x.eq(0).sum())
+    lineage_na_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']).groupby('lineage').agg(lambda x: x.eq(-1).sum())
     no_uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
-    return lineage_freq, lineage_avg , lineage_std,lineage_zero_count
+    return lineage_freq, lineage_avg , lineage_std,lineage_zero_count,lineage_na_count
 
 
 def uk_calculate(uk_df, uk_variant_mutations):
@@ -87,6 +88,8 @@ def uk_calculate(uk_df, uk_variant_mutations):
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
     lineage_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
         .groupby('lineage').agg(lambda x: x.eq(0).sum())
+    lineage_na_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+        .groupby('lineage').agg(lambda x: x.eq(-1).sum())
     uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
     lineage_avg = lineage_avg['B.1.1.7 - UK']
@@ -94,11 +97,10 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_std = lineage_std.loc['B.1.1.7 - UK', :].transpose()
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
     lineage_zero_count=lineage_zero_count.loc['B.1.1.7 - UK', :].transpose()
+    lineage_na_count=lineage_na_count.loc['B.1.1.7 - UK', :].transpose()
     #lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
-    lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " (" + round(
-        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"+" std= "+round(lineage_std,2).astype(str)+" (#0 - "+lineage_zero_count.astype(int).astype(str)+" )"
-
-
+    lineage_freq = "all:"lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + "," + round(
+        (lineage_freq / uk_total * 100), 2).astype(str) + "%"+" ,sd: "+round(lineage_std,2).astype(str)+", 0 - "+lineage_zero_count.astype(int).astype(str)+ '\\' + uk_total.astype(str) +", NA:"lineage_na_count.astype(int).astype(str)+ '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
 
@@ -217,15 +219,19 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/' + name + '.csv', index=False)
 
-    no_uk_lineage_freq, no_uk_lineage_avg, no_uk_lineage_std,no_uk_zero = no_uk_calculate(final_df.copy(), other_variants)
+    no_uk_lineage_freq, no_uk_lineage_avg, no_uk_lineage_std,no_uk_zero ,no_uk_na= no_uk_calculate(final_df.copy(), other_variants)
     uk_lineage_freq, uk_lineage_avg = uk_calculate(final_df.copy(), uk_variant_mutations)
 
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str) + " (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                                               2).astype(str) + "%)" +" std= "+round(no_uk_lineage_std[name],2).astype(str)+" (#0 - "+no_uk_zero[name].astype(int).astype(str)+" )"
-
+        no_uk_lineage_freq[name] = "all:"+no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
+            'total'].astype(str) + "," + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
+                                               2).astype(str) + "%, sd:"+round(no_uk_lineage_std[name],2).astype(str) +", 0:"+no_uk_zero[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
+            'total'].astype(str)+", NA:"+no_uk_na[name].astype(int).astype(str).+ '\\' + no_uk_lineage_freq[
+            'total'].astype(str)
+    35\40 (87.5%) std= 26.98 (#0 - 3 )
+    
+        
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
     surv_table = sortAndTranspose(surv_table)
