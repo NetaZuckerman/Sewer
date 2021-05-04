@@ -61,6 +61,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    round((lineage_avg),2)
     lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
@@ -69,7 +70,6 @@ def no_uk_calculate(no_uk_df, other_variants):
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
     no_uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
-    print(lineage_std)
     return lineage_freq, lineage_avg , lineage_std
 
 
@@ -90,7 +90,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_freq = lineage_freq.loc['B.1.1.7 - UK', :].transpose()
     #lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
     lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " (" + round(
-        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"+"std= "+lineage_std
+        (lineage_freq / uk_total * 100), 2).astype(str) + "%)"+"std= "+lineage_std.astype(int).astype(str)
 
     return lineage_freq, lineage_avg
 
@@ -217,7 +217,7 @@ if __name__ == '__main__':
         # lineage_freq[name] /= lineage_freq['total']/100
         no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
             'total'].astype(str) + " (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                                               2).astype(str) + "%)" +"std="+no_uk_lineage_std[name]
+                                               2).astype(str) + "%)" +"std="+no_uk_lineage_std[name].astype(int).astype(str)
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
