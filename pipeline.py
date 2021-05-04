@@ -99,7 +99,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_zero_count=lineage_zero_count.loc['B.1.1.7 - UK', :].transpose()
     lineage_na_count=lineage_na_count.loc['B.1.1.7 - UK', :].transpose()
     #lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
-    lineage_freq = "all:"lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + "," + round(
+    lineage_freq = "all:"+lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + "," + round(
         (lineage_freq / uk_total * 100), 2).astype(str) + "%"+" ,sd: "+round(lineage_std,2).astype(str)+", 0 - "+lineage_zero_count.astype(int).astype(str)+ '\\' + uk_total.astype(str) +", NA:"lineage_na_count.astype(int).astype(str)+ '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
