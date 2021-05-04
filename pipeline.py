@@ -226,7 +226,7 @@ if __name__ == '__main__':
         no_uk_lineage_freq[name] = "all:"+no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
             'total'].astype(str) + "," + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
                                                2).astype(str) + "%, sd:"+round(no_uk_lineage_std[name],2).astype(str) +", 0:"+no_uk_zero[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str)+", NA:"+no_uk_na[name].astype(int).astype(str).+ '\\' + no_uk_lineage_freq[
+            'total'].astype(str)+", NA:"+no_uk_na[name].astype(int).astype(str)+ '\\' + no_uk_lineage_freq[
             'total'].astype(str)
     35\40 (87.5%) std= 26.98 (#0 - 3 )
     
