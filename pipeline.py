@@ -215,7 +215,7 @@ if __name__ == '__main__':
         # lineage_freq[name] /= lineage_freq['total']/100
         no_uk_lineage_freq[name] = no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
             'total'].astype(str) + " (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                                               2).astype(str) + "%) +"std="+no_uk_lineage_std[name]
+                                               2).astype(str) + "%)" +"std="+no_uk_lineage_std[name]
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
