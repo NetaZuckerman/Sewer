@@ -61,7 +61,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
     # create another surveillance table
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
-    lineage_std = no_uk_df.groupby('lineage').std().transpose()
+    lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std().transpose()
     # calculate frequency
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
     no_uk_df.fillna(-1, inplace=True)
