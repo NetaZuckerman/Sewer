@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
     all_mutations = set([x for x in muttable.AA])
-    uk_variant_mutations = set(muttable_by_lineage['B.1.1.7 - UK']['AA'])  # list of mutations of uk variant
+    uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['AA'])  # list of mutations of uk variant
     other_variants = all_mutations - uk_variant_mutations
     other_variants.remove('L5F')
 
