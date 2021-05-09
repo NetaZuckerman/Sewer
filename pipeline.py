@@ -223,11 +223,14 @@ if __name__ == '__main__':
 
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
-        no_uk_lineage_freq[name] = "all:"+no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str) + " ; (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                                               2).astype(str) + "%, sd:"+round(no_uk_lineage_std[name],2).astype(str) +"); zero:"+no_uk_zero[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-            'total'].astype(str)+"; NA:"+no_uk_na[name].astype(int).astype(str)+ '\\' + no_uk_lineage_freq[
-            'total'].astype(str)    
+        try:
+            no_uk_lineage_freq[name] = "all:"+no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
+                'total'].astype(str) + " ; (" + round((no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
+                                                   2).astype(str) + "%, sd:"+round(no_uk_lineage_std[name],2).astype(str) +"); zero:"+no_uk_zero[name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
+                'total'].astype(str)+"; NA:"+no_uk_na[name].astype(int).astype(str)+ '\\' + no_uk_lineage_freq[
+                'total'].astype(str)    
+        except:
+            print(name)
         
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
