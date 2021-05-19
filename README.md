@@ -10,6 +10,7 @@ First ensure that you are running as sudo and the required conda enviorment -
 
 
 after that, you should import the relevent files from data2 to the sewer folder in data3 by the importEnvs script.
+
 make sure that the name in the script args is identical to the folder name in data2
 
 3) ./importEnvs NGSXX_XXXX2021   i.e - NGS84_21042021.
@@ -28,8 +29,11 @@ run the script -
 
 The parameters are - 
   1] the path for the script
+  
   2] the path for the bam folder
+  
   3] the minimum coverage to get value
+  
   4] path for the reference sequence
   
 The results will create in results folder when the script is finished.
