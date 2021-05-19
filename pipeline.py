@@ -54,6 +54,7 @@ def sortAndTranspose(df):
     """
     This function sort and transpose the surveillance_table file by the keysort function
     """
+    # taking the desired columns order from a file in the server
     df = df.reindex(columns=[x[:-1] for x in open("/data/projects/Dana/scripts/Sewer/Lineages_ordered.txt", "r")])
     df = df.transpose()
     try:
@@ -68,6 +69,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     """
     this function calculate freq and average for the non-uk mutations and lineages
     (the non-uk doesn't include b.1.1.7 mutations)
+    For the surveillance_table.csv
     :param no_uk_df: the monitored_mutations DataFrame, about to filter out the b.1.1.7 mutations
     :param other_variants:  list of all the mutations that doesn't belong to b.1.1.7 mutations
     :return:
@@ -77,6 +79,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     # calculate avg and std
     # avg and std doesn't include NA's in the calculation
     lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
     lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std()
     # calculate frequency
@@ -99,18 +102,34 @@ def no_uk_calculate(no_uk_df, other_variants):
 
 
 def uk_calculate(uk_df, uk_variant_mutations):
+    """
+    this function calculate freq and average for the uk lineage mutations
+    (only B.1.1.7 mutations)
+    For the surveillance_table.csv
+    :param uk_df: the monitored_mutations DataFrame, about to remain with only uk mutations
+    :param uk_variant_mutations:  the mutations of the uk variant
+    :return:
+    """
+    # filtering mutations
     uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
-    # create another surveillance table
+    # calculate avg and std
+    # avg and std doesn't include NA's in the calculation
     lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
     lineage_std = uk_df.drop('pos', axis=1).groupby('lineage').std()
     # calculate frequency
+    # number of total mutations (include NA's) per lineage
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
+    # temporarily Changes NA's to -1 to help the counting
     uk_df.fillna(-1, inplace=True)
+    # number of non zero mutations (Greater than 0, not including NA's) per lineage
     lineage_non_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
+    # number of zeros per lineage
     lineage_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
         .groupby('lineage').agg(lambda x: x.eq(0).sum())
+    # number of NA's per lineage
     lineage_na_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
         .groupby('lineage').agg(lambda x: x.eq(-1).sum())
     uk_df.replace(-1, None, inplace=True)
@@ -122,6 +141,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_zero_count = lineage_zero_count.loc['B.1.1.7', :].transpose()
     lineage_na_count = lineage_na_count.loc['B.1.1.7', :].transpose()
     # lineage_freq = lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str)
+    # Build the value in B.1.1.7 Freq column
     lineage_freq = "all:" + lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " ; (" + round(
         (lineage_freq / uk_total * 100), 2).astype(str) + "%," + " sd: " + round(lineage_std, 2).astype(
         str) + "); zero - " + lineage_zero_count.astype(int).astype(str) + '\\' + uk_total.astype(
@@ -152,9 +172,13 @@ if __name__ == '__main__':
     # table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
+    # getting list of all mutations
     all_mutations = set([x for x in muttable.AA])
+    # only uk mutations
     uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['AA'])  # list of mutations of uk variant
+    # all of the non-uk mutations
     other_variants = all_mutations - uk_variant_mutations
+    # L5F doesn't included in both lists
     other_variants.remove('L5F')
 
     all_tables = {}
@@ -206,19 +230,20 @@ if __name__ == '__main__':
         final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'] - 1, pileup_table, min_depth),
                                              axis=1)
 
+    # sorting and organizing the monitored_mutations file
     final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
-
     sortednames = sorted([x for x in final_df.columns.values if "nv" in x], key=keysort)
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
-
+    # creating folders
     if not os.path.exists('results'):
         os.mkdir('results/')
     monitoredfile = final_df.copy()
+    # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
     monitoredfile.to_csv("results/monitored_mutations.csv")
-
+    # Folders for the pileups
     try:
         os.makedirs('results/mutationsPileups')
     except OSError as e:
@@ -244,6 +269,7 @@ if __name__ == '__main__':
         table.reset_index(level=0, inplace=True)
         table.to_csv('results/mutationsPileups/' + name + '.csv', index=False)
 
+    # Start Handling the surveillance_table.csv
     no_uk_lineage_freq, no_uk_lineage_avg, no_uk_lineage_std, no_uk_zero, no_uk_na = no_uk_calculate(final_df.copy(),
                                                                                                      other_variants)
     uk_lineage_freq, uk_lineage_avg = uk_calculate(final_df.copy(), uk_variant_mutations)
@@ -251,6 +277,7 @@ if __name__ == '__main__':
     for name in all_tables.keys():
         # lineage_freq[name] /= lineage_freq['total']/100
         try:
+            # Build the value in Lineage Freq column
             no_uk_lineage_freq[name] = "all:" + no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + \
                                        no_uk_lineage_freq[
                                            'total'].astype(str) + " ; (" + round(
