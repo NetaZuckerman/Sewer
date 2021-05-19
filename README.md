@@ -9,8 +9,8 @@ First ensure that you are running as sudo and the required conda enviorment -
 2) conda activate sewer
 
 
-after that import the relevent files from data2 to the sewer folder in data3 by the importEnvs script.
-make sure that is the exact folder name from data2
+after that, you should import the relevent files from data2 to the sewer folder in data3 by the importEnvs script.
+make sure that the name in the script args is identical to the folder name in data2
 
 3) ./importEnvs NGSXX_XXXX2021   i.e - NGS84_21042021.
 
