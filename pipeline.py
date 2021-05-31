@@ -149,6 +149,32 @@ def uk_calculate(uk_df, uk_variant_mutations):
     return lineage_freq, lineage_avg
 
 
+def addVerdict(survTable):
+    survTable.insert(1, 'verdict', "")
+    for index, row in survTable.iterrows():
+        verList = []
+        for (columnName, columnData) in row.iteritems():
+            if "freq" in columnName:
+                # check if not nan
+                if columnData == columnData:
+                    freq = columnData.split(";")[1].split("%")[0][2:]
+                    if float(freq) >= 60:
+                        lineageName = str(columnName).split(" ")[0]
+                        avgColName = lineageName + " avg"
+                        lineageAvg = row[avgColName]
+                        verList.append(lineageName + " " + str(lineageAvg) + "%")
+                    elif 60 > float(freq) >= 40:
+                        lineageName = str(columnName).split(" ")[0]
+                        avgColName = lineageName + " avg"
+                        lineageAvg = row[avgColName]
+                        verList.append("Suspect: "+lineageName + " " + str(lineageAvg) + "%")
+        if len(verList)>0:
+            toSurv = ' '.join(verList)
+        else:
+            toSurv="Undetermined"
+        survTable["verdict"][index] = toSurv
+
+
 if __name__ == '__main__':
     # user input
     bam_dir = argv[1]
@@ -295,4 +321,5 @@ if __name__ == '__main__':
     surv_table = sortAndTranspose(surv_table)
     surv_table['B.1.1.7 avg'] = uk_lineage_avg
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
+    addVerdict(surv_table)
     surv_table.to_csv('results/surveillance_table.csv')
