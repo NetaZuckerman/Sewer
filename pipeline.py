@@ -149,30 +149,38 @@ def uk_calculate(uk_df, uk_variant_mutations):
     return lineage_freq, lineage_avg
 
 
+
 def addVerdict(survTable):
-    survTable.insert(1, 'verdict', "")
-    for index, row in survTable.iterrows():
-        verList = []
-        for (columnName, columnData) in row.iteritems():
-            if "freq" in columnName:
-                # check if not nan
-                if columnData == columnData:
-                    freq = columnData.split(";")[1].split("%")[0][2:]
-                    if float(freq) >= 60:
-                        lineageName = str(columnName).split(" ")[0]
-                        avgColName = lineageName + " avg"
-                        lineageAvg = row[avgColName]
-                        verList.append(lineageName + " " + str(lineageAvg) + "%")
-                    elif 60 > float(freq) >= 40:
-                        lineageName = str(columnName).split(" ")[0]
-                        avgColName = lineageName + " avg"
-                        lineageAvg = row[avgColName]
-                        verList.append("Suspect: "+lineageName + " " + str(lineageAvg) + "%")
-        if len(verList)>0:
-            toSurv = ' '.join(verList)
-        else:
-            toSurv="Undetermined"
-        survTable["verdict"][index] = toSurv
+    try:
+        survTable.insert(1, 'verdict', "")
+        for index, row in survTable.iterrows():
+            verList = []
+            for (columnName, columnData) in row.iteritems():
+                if "freq" in columnName:
+                    # check if not nan
+                    if columnData == columnData and columnData!='0':
+                        freq = columnData.split(";")[1].split("%")[0][2:]
+                        if float(freq) >= 60:
+                            lineageName = str(columnName).split(" ")[0]
+                            avgColName = lineageName + " avg"
+                            lineageAvg = row[avgColName]
+                            verList.append(lineageName + " " + str(lineageAvg) + "%")
+                        elif 60 > float(freq) >= 40:
+                            numOfZeros = int(columnData.split(";")[2].split(":")[1].split("\\")[0])
+                            total = int(columnData.split(";")[2].split(":")[1].split("\\")[1])
+                            if numOfZeros/total*100<10:
+                                lineageName = str(columnName).split(" ")[0]
+                                avgColName = lineageName + " avg"
+                                lineageAvg = row[avgColName]
+                                verList.append("Suspect: "+lineageName + " " + str(lineageAvg) + "%")
+            if len(verList)>0:
+                toSurv = ' '.join(verList)
+            else:
+                toSurv="Undetermined"
+            survTable["verdict"][index] = toSurv
+        return survTable
+    except:
+        print("Verdict column already exist")
 
 
 if __name__ == '__main__':
