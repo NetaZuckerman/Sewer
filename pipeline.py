@@ -179,8 +179,8 @@ def addVerdict(survTable):
                 toSurv="Undetermined"
             survTable["verdict"][index] = toSurv
         return survTable
-    except:
-        print("Verdict column already exist")
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':
