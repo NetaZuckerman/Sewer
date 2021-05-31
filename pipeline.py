@@ -7,6 +7,8 @@ import glob
 import os
 import errno
 import re
+import traceback
+
 
 """
 for sewer samples.
@@ -149,7 +151,6 @@ def uk_calculate(uk_df, uk_variant_mutations):
     return lineage_freq, lineage_avg
 
 
-
 def addVerdict(survTable):
     try:
         survTable.insert(1, 'verdict', "")
@@ -158,7 +159,7 @@ def addVerdict(survTable):
             for (columnName, columnData) in row.iteritems():
                 if "freq" in columnName:
                     # check if not nan
-                    if columnData == columnData and columnData!='0':
+                    if columnData == columnData and columnData != '0':
                         freq = columnData.split(";")[1].split("%")[0][2:]
                         if float(freq) >= 60:
                             lineageName = str(columnName).split(" ")[0]
@@ -168,20 +169,19 @@ def addVerdict(survTable):
                         elif 60 > float(freq) >= 40:
                             numOfZeros = int(columnData.split(";")[2].split(":")[1].split("\\")[0])
                             total = int(columnData.split(";")[2].split(":")[1].split("\\")[1])
-                            if numOfZeros/total*100<10:
+                            if numOfZeros / total * 100 < 10:
                                 lineageName = str(columnName).split(" ")[0]
                                 avgColName = lineageName + " avg"
                                 lineageAvg = row[avgColName]
-                                verList.append("Suspect: "+lineageName + " " + str(lineageAvg) + "%")
-            if len(verList)>0:
+                                verList.append("Suspect: " + lineageName + " " + str(lineageAvg) + "%")
+            if len(verList) > 0:
                 toSurv = ' '.join(verList)
             else:
-                toSurv="Undetermined"
+                toSurv = "Undetermined"
             survTable["verdict"][index] = toSurv
         return survTable
-        except Exception as e:
-            print(e)
-
+    except:
+        traceback.print_exc()
 
 if __name__ == '__main__':
     # user input
