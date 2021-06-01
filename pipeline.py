@@ -77,10 +77,10 @@ def no_uk_calculate(no_uk_df, other_variants):
     :return:
     """
     # filtering mutations
-    no_uk_df = no_uk_df[(no_uk_df.AA.isin(other_variants))]
+    no_uk_df = no_uk_df[(no_uk_df.variant.isin(other_variants))]
     # calculate avg and std
     # avg and std doesn't include NA's in the calculation
-    lineage_avg = no_uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = no_uk_df.drop('Position', axis=1).groupby('lineage').mean().transpose()
     # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
     lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std()
@@ -90,13 +90,13 @@ def no_uk_calculate(no_uk_df, other_variants):
     # temporarily Changes NA's to -1 to help the counting
     no_uk_df.fillna(-1, inplace=True)
     # number of non zero mutations (Greater than 0, not including NA's) per lineage
-    lineage_non_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+    lineage_non_zero_count = no_uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']) \
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
     # number of zeros per lineage
-    lineage_zero_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']).groupby(
+    lineage_zero_count = no_uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']).groupby(
         'lineage').agg(lambda x: x.eq(0).sum())
     # number of NA's per lineage
-    lineage_na_count = no_uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']).groupby(
+    lineage_na_count = no_uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']).groupby(
         'lineage').agg(lambda x: x.eq(-1).sum())
     no_uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
@@ -113,10 +113,10 @@ def uk_calculate(uk_df, uk_variant_mutations):
     :return:
     """
     # filtering mutations
-    uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
+    uk_df = uk_df[(uk_df.variant.isin(uk_variant_mutations))]
     # calculate avg and std
     # avg and std doesn't include NA's in the calculation
-    lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
+    lineage_avg = uk_df.drop('Position', axis=1).groupby('lineage').mean().transpose()
     # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
     lineage_std = uk_df.drop('pos', axis=1).groupby('lineage').std()
@@ -126,13 +126,13 @@ def uk_calculate(uk_df, uk_variant_mutations):
     # temporarily Changes NA's to -1 to help the counting
     uk_df.fillna(-1, inplace=True)
     # number of non zero mutations (Greater than 0, not including NA's) per lineage
-    lineage_non_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+    lineage_non_zero_count = uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']) \
         .groupby('lineage').agg(lambda x: x.gt(0).sum())
     # number of zeros per lineage
-    lineage_zero_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+    lineage_zero_count = uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']) \
         .groupby('lineage').agg(lambda x: x.eq(0).sum())
     # number of NA's per lineage
-    lineage_na_count = uk_df.drop(columns=['nucleotide', 'AA', 'gene', 'type', 'pos', 'REF', 'mut']) \
+    lineage_na_count = uk_df.drop(columns=['varname', 'variant', 'protein', 'Mutation type', 'Position', 'Reference', 'Mutation']) \
         .groupby('lineage').agg(lambda x: x.eq(-1).sum())
     uk_df.replace(-1, None, inplace=True)
     lineage_freq = lineage_num_muts.join(lineage_non_zero_count)
