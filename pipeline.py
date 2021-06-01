@@ -162,7 +162,6 @@ def addVerdict(survTable):
                 if "freq" in columnName:
                     # check if not nan
                     if columnData == columnData and columnData != '0':
-                        a = splitNumbers(columnData)
                         freq = columnData.split(";")[1].split("%")[0][2:]
                         if float(freq) >= 60:
                             lineageName = str(columnName).split(" ")[0]
