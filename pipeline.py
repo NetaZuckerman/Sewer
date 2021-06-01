@@ -161,7 +161,7 @@ def addVerdict(survTable):
             for (columnName, columnData) in row.iteritems():
                 if "freq" in columnName:
                     # check if not nan
-                    if columnData == columnData and columnData != 0 or columnData != '0':
+                    if columnData == columnData and columnData != 0 and columnData != '0':
                         freq = columnData.split(";")[1].split("%")[0][2:]
                         if float(freq) >= 60:
                             lineageName = str(columnName).split(" ")[0]
@@ -183,6 +183,7 @@ def addVerdict(survTable):
             survTable["verdict"][index] = toSurv
         return survTable
     except:
+        print("Data: "+columnData)
         traceback.print_exc()
         
         
