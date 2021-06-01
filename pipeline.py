@@ -199,9 +199,8 @@ if __name__ == '__main__':
     # index refseq
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
-    excel_mutTable = pd.read_excel("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx", sheet_name=None)
+    excel_mutTable = pd.read_excel("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx", sheet_name=None,engine='openpyxl')
     # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit
-    excel_mutTable = pd.read_excel(excel_path, sheet_name=None)
     mutTable_copy = excel_mutTable.copy()
     for name, frame in mutTable_copy.items():
         frame['Mutation type'] = frame['Mutation type'].str.lower()  # make sure lower case to prevent mistakes
