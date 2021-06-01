@@ -340,5 +340,5 @@ if __name__ == '__main__':
     surv_table = sortAndTranspose(surv_table)
     surv_table['B.1.1.7 avg'] = uk_lineage_avg
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
-    addVerdict(surv_table)
+    #addVerdict(surv_table)
     surv_table.to_csv('results/surveillance_table.csv')
