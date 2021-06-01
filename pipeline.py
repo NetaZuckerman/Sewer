@@ -52,12 +52,12 @@ def keysort(elem):
         return 0
 
 
-def sortAndTranspose(df):
+def sortAndTranspose(df,uniq_lineages):
     """
     This function sort and transpose the surveillance_table file by the keysort function
     """
     # taking the desired columns order from a file in the server
-    df = df.reindex(columns=[x[:-1] for x in open("/data/projects/Dana/scripts/Sewer/Lineages_ordered.txt", "r")])
+    df = df.reindex(columns=[str(x) for x in uniq_lineages])
     df = df.transpose()
     try:
         df = df[sorted(df.columns, key=keysort)]
@@ -335,7 +335,7 @@ if __name__ == '__main__':
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
-    #surv_table = sortAndTranspose(surv_table)
+    surv_table = sortAndTranspose(surv_table,uniq_lineages)
     surv_table['B.1.1.7 avg'] = uk_lineage_avg
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
     addVerdict(surv_table)
