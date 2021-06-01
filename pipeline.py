@@ -83,7 +83,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     lineage_avg = no_uk_df.drop('Position', axis=1).groupby('lineage').mean().transpose()
     # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
-    lineage_std = no_uk_df.drop('pos', axis=1).groupby('lineage').std()
+    lineage_std = no_uk_df.drop('Position', axis=1).groupby('lineage').std()
     # calculate frequency
     # number of total mutations (include NA's) per lineage
     lineage_num_muts = no_uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
@@ -119,7 +119,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     lineage_avg = uk_df.drop('Position', axis=1).groupby('lineage').mean().transpose()
     # round to 2 digits after decimal point
     lineage_avg = round(lineage_avg, 2)
-    lineage_std = uk_df.drop('pos', axis=1).groupby('lineage').std()
+    lineage_std = uk_df.drop('Position', axis=1).groupby('lineage').std()
     # calculate frequency
     # number of total mutations (include NA's) per lineage
     lineage_num_muts = uk_df.groupby('lineage')['lineage'].count().to_frame().rename(columns={'lineage': 'total'})
