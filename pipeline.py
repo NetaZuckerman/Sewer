@@ -184,7 +184,7 @@ def addVerdict(survTable):
             survTable["verdict"][index] = toSurv
         return survTable
     except:
-        print("Data: "+columnData)
+        print("Data: "+str(columnData))
         traceback.print_exc()
 
         
