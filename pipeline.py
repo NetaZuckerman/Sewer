@@ -77,7 +77,7 @@ def no_uk_calculate(no_uk_df, other_variants):
     For the surveillance_table.csv
     :param no_uk_df: the monitored_mutations DataFrame, about to filter out the b.1.1.7 mutations
     :param other_variants:  list of all the mutations that doesn't belong to b.1.1.7 mutations
-    :return:
+    :return information about every lineage  - frequency,average,standard deviation, number of zeros and number of NA's:
     """
     # filtering mutations
     no_uk_df = no_uk_df[(no_uk_df.variant.isin(other_variants))]
@@ -113,7 +113,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     For the surveillance_table.csv
     :param uk_df: the monitored_mutations DataFrame, about to remain with only uk mutations
     :param uk_variant_mutations:  the mutations of the uk variant
-    :return:
+    :return information the UK lineage  - frequency,average:
     """
     # filtering mutations
     uk_df = uk_df[(uk_df.variant.isin(uk_variant_mutations))]
