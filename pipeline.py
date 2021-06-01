@@ -272,11 +272,11 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        final_df[file_name] = final_df.apply(lambda row: frequency(row['mut'], row['pos'] - 1, pileup_table, min_depth),
+        final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], row['Position'] - 1, pileup_table, min_depth),
                                              axis=1)
 
     # sorting and organizing the monitored_mutations file
-    final_df = final_df.sort_values(["lineage", "gene"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
+    final_df = final_df.sort_values(["lineage", "protein"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
     sortednames = sorted([x for x in final_df.columns.values if "nv" in x], key=keysort)
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
