@@ -146,7 +146,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
     # Build the value in B.1.1.7 Freq column
     lineage_freq = "all:" + lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " ; (" + round(
         (lineage_freq / uk_total * 100), 2).astype(str) + "%," + " sd: " + round(lineage_std, 2).astype(
-        str) + "); zero - " + lineage_zero_count.astype(int).astype(str) + '\\' + uk_total.astype(
+        str) + "); zero: " + lineage_zero_count.astype(int).astype(str) + '\\' + uk_total.astype(
         str) + "; NA:" + lineage_na_count.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
@@ -170,8 +170,8 @@ def addVerdict(survTable):
                             lineageAvg = row[avgColName]
                             verList.append(lineageName + " " + str(lineageAvg) + "%")
                         elif 60 > float(freq) >= 35:
-                            numOfZeros = int(columnData.split(";")[2].split("-")[1].split("\\")[0])
-                            total = int(columnData.split(";")[2].split("-")[1].split("\\")[1])
+                            numOfZeros = int(columnData.split(";")[2].split(":")[1].split("\\")[0])
+                            total = int(columnData.split(";")[2].split(":")[1].split("\\")[1])
                             if numOfZeros / total * 100 < 10:
                                 lineageName = str(columnName).split(" ")[0]
                                 avgColName = lineageName + " avg"
@@ -322,7 +322,7 @@ if __name__ == '__main__':
                                        no_uk_lineage_freq[
                                            'total'].astype(str) + " ; (" + round(
                 (no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                2).astype(str) + "%, sd:" + round(no_uk_lineage_std[name], 2).astype(str) + "); zero:" + no_uk_zero[
+                2).astype(str) + "%, sd:" + round(no_uk_lineage_std[name], 2).astype(str) + "); zero: " + no_uk_zero[
                                            name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
                                            'total'].astype(str) + "; NA:" + no_uk_na[name].astype(int).astype(
                 str) + '\\' + no_uk_lineage_freq[
