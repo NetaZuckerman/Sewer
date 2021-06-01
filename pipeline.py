@@ -57,7 +57,10 @@ def sortAndTranspose(df,uniq_lineages):
     This function sort and transpose the surveillance_table file by the keysort function
     """
     # taking the desired columns order from a file in the server
-    df = df.reindex(columns=[str(x) for x in uniq_lineages])
+    avgcols=[str(x)+" avg" for x in uniq_lineages]
+    freqcols=[str(x)+" freq" for x in uniq_lineages]
+    order=[j for i in zip(avgcols, freqcols) for j in i]
+    df = df.reindex(columns=[str(x) for x in order])
     df = df.transpose()
     try:
         df = df[sorted(df.columns, key=keysort)]
