@@ -283,9 +283,8 @@ if __name__ == '__main__':
     # creating folders
     if not os.path.exists('results'):
         os.mkdir('results/')
-    
+    final_df = final_df.drop(['Unnamed: 6','% of sequences'], axis=1)
     monitoredfile = final_df.copy()
-    monitoredfile = monitoredfile.drop(['Unnamed: 6','% of sequences'], axis=1)
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
