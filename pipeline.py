@@ -285,7 +285,7 @@ if __name__ == '__main__':
         os.mkdir('results/')
     
     monitoredfile = final_df.copy()
-    monitoredfile = monitoredfile.drop(['Unnamed: 6'], axis=1)
+    monitoredfile = monitoredfile.drop(['Unnamed: 6','% of sequences'], axis=1)
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
