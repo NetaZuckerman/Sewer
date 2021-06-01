@@ -169,7 +169,7 @@ def addVerdict(survTable):
                             avgColName = lineageName + " avg"
                             lineageAvg = row[avgColName]
                             verList.append(lineageName + " " + str(lineageAvg) + "%")
-                        elif 60 > float(freq) >= 40:
+                        elif 60 > float(freq) >= 35:
                             numOfZeros = int(columnData.split(";")[2].split("-")[1].split("\\")[0])
                             total = int(columnData.split(";")[2].split("-")[1].split("\\")[1])
                             if numOfZeros / total * 100 < 10:
