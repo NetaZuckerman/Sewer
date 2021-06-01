@@ -207,10 +207,7 @@ if __name__ == '__main__':
         excel_mutTable[name] = frame[frame['Mutation type'] != 'insertion']
         excel_mutTable[name]['lineage'] = name  # add a lineage column to all variant's tables
     muttable = pd.concat(excel_mutTable.values(), ignore_index=True)
-    uniq_lineages = set()
-    for lin in muttable.lineage:
-        lin=lin.rsplit('_',1)
-        uniq_lineages.add(lin[0].strip())
+    uniq_lineages = [lin.rsplit('_',1)[0] for lin in excel_mutTable]
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
         table.lineage = lin
