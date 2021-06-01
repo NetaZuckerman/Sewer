@@ -150,17 +150,19 @@ def uk_calculate(uk_df, uk_variant_mutations):
         str) + "; NA:" + lineage_na_count.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
-
 def addVerdict(survTable):
     try:
         survTable.insert(1, 'verdict', "")
+    except:
+        print("verdict column is already exist")
+    try:
         for index, row in survTable.iterrows():
             verList = []
             for (columnName, columnData) in row.iteritems():
                 if "freq" in columnName:
                     # check if not nan
                     if columnData == columnData and columnData != '0':
-                        print(columnData)
+                        a = splitNumbers(columnData)
                         freq = columnData.split(";")[1].split("%")[0][2:]
                         if float(freq) >= 60:
                             lineageName = str(columnName).split(" ")[0]
@@ -183,7 +185,8 @@ def addVerdict(survTable):
         return survTable
     except:
         traceback.print_exc()
-
+        
+        
 if __name__ == '__main__':
     # user input
     bam_dir = argv[1]
