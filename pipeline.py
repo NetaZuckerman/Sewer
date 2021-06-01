@@ -150,6 +150,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
         str) + "; NA:" + lineage_na_count.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
+
 def addVerdict(survTable):
     try:
         survTable.insert(1, 'verdict', "")
@@ -169,8 +170,8 @@ def addVerdict(survTable):
                             lineageAvg = row[avgColName]
                             verList.append(lineageName + " " + str(lineageAvg) + "%")
                         elif 60 > float(freq) >= 40:
-                            numOfZeros = int(columnData.split(";")[2].split(":")[1].split("\\")[0])
-                            total = int(columnData.split(";")[2].split(":")[1].split("\\")[1])
+                            numOfZeros = int(columnData.split(";")[2].split("-")[1].split("\\")[0])
+                            total = int(columnData.split(";")[2].split("-")[1].split("\\")[1])
                             if numOfZeros / total * 100 < 10:
                                 lineageName = str(columnName).split(" ")[0]
                                 avgColName = lineageName + " avg"
@@ -185,6 +186,7 @@ def addVerdict(survTable):
     except:
         print("Data: "+columnData)
         traceback.print_exc()
+
         
         
 if __name__ == '__main__':
