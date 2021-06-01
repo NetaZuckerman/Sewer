@@ -153,7 +153,7 @@ def uk_calculate(uk_df, uk_variant_mutations):
 
 def addVerdict(survTable):
     try:
-        survTable.insert(1, 'verdict', "")
+        survTable.insert(0, 'verdict', "")
     except:
         print("verdict column is already exist")
     try:
