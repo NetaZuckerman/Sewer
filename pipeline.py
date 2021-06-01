@@ -199,13 +199,19 @@ if __name__ == '__main__':
     # index refseq
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
-    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
+    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx")  # TODO: get from other location!
     # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit
-    muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)
+    excel_mutTable = pd.read_excel(excel_path, sheet_name=None)
+    mutTable_copy = excel_mutTable.copy()
+    for name, frame in mutTable_copy.items():
+        frame['Mutation type'] = frame['Mutation type'].str.lower()  # make sure lower case to prevent mistakes
+        excel_mutTable[name] = frame[frame['Mutation type'] != 'insertion']
+        excel_mutTable[name]['lineage'] = name  # add a lineage column to all variant's tables
+    muttable = pd.concat(excel_mutTable.values(), ignore_index=True)
     uniq_lineages = set()
     for lin in muttable.lineage:
-        for x in lin.split(','):
-            uniq_lineages.add(x.strip())
+        lin=lin.rsplit('_',1)
+        uniq_lineages.add(lin[0].strip())
     muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
     for lin, table in muttable_by_lineage.items():
         table.lineage = lin
@@ -213,9 +219,9 @@ if __name__ == '__main__':
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
     # getting list of all mutations
-    all_mutations = set([x for x in muttable.AA])
+    all_mutations = set([x for x in muttable.variant])
     # only uk mutations
-    uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['AA'])  # list of mutations of uk variant
+    uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['variant'])  # list of mutations of uk variant
     # all of the non-uk mutations
     other_variants = all_mutations - uk_variant_mutations
     # L5F doesn't included in both lists
