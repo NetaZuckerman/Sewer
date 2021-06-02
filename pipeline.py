@@ -217,6 +217,8 @@ if __name__ == '__main__':
     # table = table.assign(lineage=lin)
 
     final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
+    final_df = final_df.drop(['Unnamed: 6','% of sequences'], axis=1)
+
     # getting list of all mutations
     all_mutations = set([x for x in muttable.variant])
     # only uk mutations
@@ -284,7 +286,6 @@ if __name__ == '__main__':
     # creating folders
     if not os.path.exists('results'):
         os.mkdir('results/')
-    final_df = final_df.drop(['Unnamed: 6','% of sequences'], axis=1)
     monitoredfile = final_df.copy()
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
