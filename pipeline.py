@@ -274,11 +274,6 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        print(final_df)
-        print(final_df['Mutation'])
-        print(final_df['Position'])
-        final_df.to_csv('yourfileout.csv', encoding='utf-8')
-
         final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], row['Position'] - 1, pileup_table, min_depth),
                                              axis=1)
 
