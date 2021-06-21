@@ -55,7 +55,7 @@ def sortAndTranspose(df):
     This function sort and transpose the surveillance_table file by the keysort function
     """
     # taking the desired columns order from a file in the server
-    df = df.reindex(columns=[x[:-1] for x in open("/data/projects/Dana/scripts/Sewer/Lineages_ordered.txt", "r")])
+    df = df.reindex(columns=[x[:-1] for x in open("/data/projects/Dana/scripts/Sewer/Lineages_ordered.txt", "r")])  #TODO: pull from uniq lineages instead of file (Netanel)
     df = df.transpose()
     try:
         df = df[sorted(df.columns, key=keysort)]
@@ -108,10 +108,10 @@ def uk_calculate(uk_df, uk_variant_mutations):
     For the surveillance_table.csv
     :param uk_df: the monitored_mutations DataFrame, about to remain with only uk mutations
     :param uk_variant_mutations:  the mutations of the uk variant
-    :return:
+    :return: # TODO: Netanel
     """
     # filtering mutations
-    uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]
+    uk_df = uk_df[(uk_df.AA.isin(uk_variant_mutations))]  # TODO: chang with new mutations table
     # calculate avg and std
     # avg and std doesn't include NA's in the calculation
     lineage_avg = uk_df.drop('pos', axis=1).groupby('lineage').mean().transpose()
@@ -144,35 +144,37 @@ def uk_calculate(uk_df, uk_variant_mutations):
     # Build the value in B.1.1.7 Freq column
     lineage_freq = "all:" + lineage_freq.astype(int).astype(str) + '\\' + uk_total.astype(str) + " ; (" + round(
         (lineage_freq / uk_total * 100), 2).astype(str) + "%," + " sd: " + round(lineage_std, 2).astype(
-        str) + "); zero - " + lineage_zero_count.astype(int).astype(str) + '\\' + uk_total.astype(
+        str) + "); zero: " + lineage_zero_count.astype(int).astype(str) + '\\' + uk_total.astype(
         str) + "; NA:" + lineage_na_count.astype(int).astype(str) + '\\' + uk_total.astype(str)
     return lineage_freq, lineage_avg
 
 
 if __name__ == '__main__':
     # user input
-    bam_dir = argv[1]
-    min_depth = int(argv[2])
+    bam_dir = argv[1]  # script to move all relevant files (env samples(BAM,FQ,CNS_5)) from NGS_runa to data3/sewer
+    min_depth = int(argv[2])  # now 5, maybe change later
     refseq_path = argv[3]
     # preparations
+    # get reference name
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
-    # index refseq
+    # index refseq samtools in python
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
-    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location!
-    # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit
-    muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)
-    uniq_lineages = set()
+    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location! # new table from excel
+    # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit (for debug)
+    muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)  # drop insertions
+    uniq_lineages = set()  # generate set of unique lineages  # TODO Dana
     for lin in muttable.lineage:
         for x in lin.split(','):
             uniq_lineages.add(x.strip())
-    muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
+
+    muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages} # TODO: Add documentatin
     for lin, table in muttable_by_lineage.items():
         table.lineage = lin
     # table = table.assign(lineage=lin)
 
-    final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
-    # getting list of all mutations
+    final_df = pd.concat([frame for frame in muttable_by_lineage.values()]) # final table
+    # getting list of all mutations by name
     all_mutations = set([x for x in muttable.AA])
     # only uk mutations
     uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['AA'])  # list of mutations of uk variant
@@ -188,9 +190,9 @@ if __name__ == '__main__':
     # iterate all bam files:
     for file in files_list:
         pileup_table = pd.DataFrame(np.empty(shape=(29903, 6)) * np.nan, columns=['C', 'A', 'G', 'T', 'N', 'del'],
-                                    index=list(range(29903)))
-        bam = pysam.AlignmentFile(file, 'rb')
-        pileup_iter = bam.pileup(stepper='nofilter')
+                                    index=list(range(29903)))  # empty pileup table
+        bam = pysam.AlignmentFile(file, 'rb')  # upload bam file
+        pileup_iter = bam.pileup(stepper='nofilter')  # samtools pileup
         # iterate over reads in each position and count nucleotides, Ns and deletions.
         for position in pileup_iter:
             c = Counter({'C': 0, 'A': 0, 'G': 0, 'T': 0, 'N': 0, 'del': 0})
@@ -208,7 +210,8 @@ if __name__ == '__main__':
                               pileup_table['del'] + pileup_table['N']
 
         pileup_table['ref'] = refseq_series
-        # pileup_table.to_csv('temp_pileuptable.csv')  # to remove after debug
+
+        # calculate frequencies of each Nuc
         pileup_table['ref_freq'] = pileup_table.apply(
             lambda row: (row[row['ref']] / row['sum']) * 100 if row['sum'] else None,
             axis=1)  # if not row['sum'] then no coverage at all.
@@ -242,7 +245,7 @@ if __name__ == '__main__':
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
-    monitoredfile.to_csv("results/monitored_mutations.csv")
+    monitoredfile.to_csv("results/monitored_mutations.csv")  # write to file
     # Folders for the pileups
     try:
         os.makedirs('results/mutationsPileups')
@@ -260,14 +263,14 @@ if __name__ == '__main__':
             raise
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
-        # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum)
+        # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum) # TODO: change to parameter given by user instead of 10
         table['N_freq'] = table.apply(lambda row: (row['N'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
-        table = table.dropna(thresh=3)
-        table.to_csv('results/fullPileups/' + name + '.csv')
-        indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index
-        table = table.drop(index=indexNames, columns=['N_freq'])
+        table = table.dropna(thresh=3)  # ?? TODO: try with other thresholds \ per nucleotide
+        table.to_csv('results/fullPileups/' + name + '.csv') # write to file
+        indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index  # TODO change to parameters
+        table = table.drop(index=indexNames, columns=['N_freq']) # remove n_frequency column
         table.reset_index(level=0, inplace=True)
-        table.to_csv('results/mutationsPileups/' + name + '.csv', index=False)
+        table.to_csv('results/mutationsPileups/' + name + '.csv', index=False) # write to file
 
     # Start Handling the surveillance_table.csv
     no_uk_lineage_freq, no_uk_lineage_avg, no_uk_lineage_std, no_uk_zero, no_uk_na = no_uk_calculate(final_df.copy(),
