@@ -204,33 +204,22 @@ if __name__ == '__main__':
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
     excel_mutTable = pd.read_excel("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx", sheet_name=None,engine='openpyxl')
-    # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit
+
     mutTable_copy = excel_mutTable.copy()
     for name, frame in mutTable_copy.items():
-        frame['Mutation type'] = frame['Mutation type'].str.lower()  # make sure lower case to prevent mistakes
-        excel_mutTable[name] = frame[frame['Mutation type'] != 'insertion']
+        excel_mutTable[name] = frame[frame['Mutation type'].str.lower() != 'insertion']
         excel_mutTable[name]['lineage'] = name  # add a lineage column to all variant's tables
-    muttable = pd.concat(excel_mutTable.values(), ignore_index=True)
-    uniq_lineages = [lin.rsplit('_',1)[0] for lin in excel_mutTable]
-    muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages}
-    muttable = pd.read_csv("/data/projects/Dana/scripts/covid19/novelMutTable.csv")  # TODO: get from other location! # new table from excel
-    # muttable = pd.read_csv("novelMutTable.csv") # TODO change before commit (for debug)
-    muttable = muttable.drop(muttable[muttable['type'] == 'Insertion'].index)  # drop insertions
-    uniq_lineages = set()  # generate set of unique lineages  # TODO Dana
-    for lin in muttable.lineage:
-        for x in lin.split(','):
-            uniq_lineages.add(x.strip())
 
-    muttable_by_lineage = {x: muttable[muttable.lineage.str.contains(x)] for x in uniq_lineages} # TODO: Add documentatin
-    for lin, table in muttable_by_lineage.items():
-        table.lineage = lin
-    # table = table.assign(lineage=lin)
-
-    final_df = pd.concat([frame for frame in muttable_by_lineage.values()])
-    final_df = final_df.drop(['Unnamed: 6','% of sequences'], axis=1)
-
+    # uniq_lineages = [lin.rsplit('_', 1)[0] for lin in excel_mutTable]
+    uniq_lineages = excel_mutTable.keys()
+    muttable_by_lineage = excel_mutTable
+    final_df = pd.concat(muttable_by_lineage.values(), ignore_index=True)
+    # final_df = final_df.drop(['Unnamed: 6','% of sequences'], axis=1)  # TODO instead: keep only wanted fields
+    final_df = final_df[['Position', 'Reference', 'Mutation', 'protein', 'variant', 'Mutation type',
+                         'annotation', 'varname', 'lineage']]  # select only certain fields
+    final_df = final_df.dropna(thresh=8)
     # getting list of all mutations
-    all_mutations = set([x for x in muttable.variant])
+    all_mutations = set([x for x in final_df.variant])
     # only uk mutations
     uk_variant_mutations = set(muttable_by_lineage['B.1.1.7']['variant'])  # list of mutations of uk variant
     # all of the non-uk mutations
@@ -265,8 +254,7 @@ if __name__ == '__main__':
                               pileup_table['del'] + pileup_table['N']
 
         pileup_table['ref'] = refseq_series
-
-        # calculate frequencies of each Nuc
+        # pileup_table.to_csv('temp_pileuptable.csv') # to remove after debug        # calculate frequencies of each Nuc
         pileup_table['ref_freq'] = pileup_table.apply(
             lambda row: (row[row['ref']] / row['sum']) * 100 if row['sum'] else None,
             axis=1)  # if not row['sum'] then no coverage at all.
@@ -285,8 +273,7 @@ if __name__ == '__main__':
         # add sample to table
         file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
-        final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], row['Position'] - 1, pileup_table, min_depth),
-                                             axis=1)
+        final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], int(row['Position']) - 1, pileup_table, min_depth), axis=1)
 
     # sorting and organizing the monitored_mutations file
     final_df = final_df.sort_values(["lineage", "protein"], ascending=(True, False))  # sort by:(1)lineage (2)gene(S first)
