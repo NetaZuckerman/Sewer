@@ -286,7 +286,15 @@ if __name__ == '__main__':
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
-    monitoredfile.to_csv("results/monitored_mutations.csv")  # write to file
+    monitoredfile.to_csv("results/monitored_mutations.csv", index=False)  # write to file  # no index
+
+    # CREATE COMPRESSED TABLE
+    compressed = monitoredfile.groupby(
+        ['Position', 'variant', 'protein', 'Mutation', 'Mutation type'])['lineage'].apply(
+        lambda x: ';'.join(x)
+    ).reset_index()
+    compressed.to_csv("results/compressed.csv")
+
     # Folders for the pileups
     try:
         os.makedirs('results/mutationsPileups')
@@ -352,3 +360,5 @@ if __name__ == '__main__':
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
     addVerdict(surv_table)
     surv_table.to_csv('results/surveillance_table.csv')
+
+
