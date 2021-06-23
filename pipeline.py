@@ -35,7 +35,6 @@ def frequency(mut_val, pos, pileup_df, depth_threshold):
             freq = (count / total) * 100
         else:
             freq = 0.0
-            # freq = None
     return freq
 
 
@@ -271,7 +270,7 @@ if __name__ == '__main__':
         pileup_table['del_freq'] = pileup_table.apply(
             lambda row: (row['del'] / row['sum']) * 100 if row['sum'] else None, axis=1)
         # add sample to table
-        file_name = file.strip('BAM/').strip('.mapped.sorted.bam')
+        file_name = file.strip('BAM/').rstrip('.mapped.sorted.bam')
         all_tables[file_name] = pileup_table
         final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], int(row['Position']) - 1, pileup_table, min_depth), axis=1)
 
@@ -307,8 +306,8 @@ if __name__ == '__main__':
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum) # TODO: change to parameter given by user instead of 10
         table['N_freq'] = table.apply(lambda row: (row['N'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
-        table = table.dropna(thresh=3)  # ?? TODO: try with other thresholds \ per nucleotide
-        table.to_csv('results/fullPileups/' + name + '.csv') # write to file
+        table = table.dropna(thresh=5)  # ?? TODO: try with other thresholds \ per nucleotide
+        table.to_csv('results/fullPileups/' + name + '.csv')  # write to file
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index  # TODO change to parameters
         table = table.drop(index=indexNames, columns=['N_freq']) # remove n_frequency column
         table.reset_index(level=0, inplace=True)
@@ -323,21 +322,32 @@ if __name__ == '__main__':
         # lineage_freq[name] /= lineage_freq['total']/100
         try:
             # Build the value in Lineage Freq column
-            no_uk_lineage_freq[name] = "all:" + no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + \
-                                       no_uk_lineage_freq[
-                                           'total'].astype(str) + " ; (" + round(
-                (no_uk_lineage_freq[name] / no_uk_lineage_freq['total'] * 100),
-                2).astype(str) + "%, sd:" + round(no_uk_lineage_std[name], 2).astype(str) + "); zero: " + no_uk_zero[
-                                           name].astype(int).astype(str) + '\\' + no_uk_lineage_freq[
-                                           'total'].astype(str) + "; NA:" + no_uk_na[name].astype(int).astype(
-                str) + '\\' + no_uk_lineage_freq[
-                                           'total'].astype(str)
+            no_uk_lineage_freq[name] = "all:" + no_uk_lineage_freq[name].astype(int).astype(str) + '\\' +  \
+                                       no_uk_lineage_freq['total'].astype(str) +  \
+                                       " ; (" + round((no_uk_lineage_freq[name]
+                                                       / no_uk_lineage_freq['total'] * 100), 2).astype(str) \
+                                       + "%, sd:" + round(no_uk_lineage_std[name], 2).astype(str) +\
+                                       "); zero: " + no_uk_zero[name].astype(int).astype(str) + \
+                                       '\\' + no_uk_lineage_freq['total'].astype(str) + "; NA:" + \
+                                       no_uk_na[name].astype(int).astype(str) + '\\' + \
+                                       no_uk_lineage_freq['total'].astype(str)
+            # TODO: change from NA: to noNA: (change calculation)
+            # no_uk_lineage_freq[name] = "all:" + no_uk_lineage_freq[name].astype(int).astype(str) + '\\' + \
+            #                            no_uk_lineage_freq['total'].astype(str) + \
+            #                            " ; (" + round((no_uk_lineage_freq[name]
+            #                                            / no_uk_lineage_freq['total'] * 100), 2).astype(str) \
+            #                            + "%, sd:" + round(no_uk_lineage_std[name], 2).astype(str) + \
+            #                            "); zero: " + no_uk_zero[name].astype(int).astype(str) + \
+            #                            '\\' + no_uk_lineage_freq['total'].astype(str) + "; noNA:" + \
+            #                            no_uk_na[name].astype(int).astype(str) + '\\' + \
+            #                            no_uk_lineage_freq['total'].astype(str)
+
         except:
             print(name)
 
     lineage_freq = no_uk_lineage_freq.drop(columns='total').transpose()
     surv_table = lineage_freq.add_suffix(' freq').join(no_uk_lineage_avg.add_suffix(' avg'))
-    surv_table = sortAndTranspose(surv_table,uniq_lineages)
+    surv_table = sortAndTranspose(surv_table, uniq_lineages)
     surv_table['B.1.1.7 avg'] = uk_lineage_avg
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
     addVerdict(surv_table)
