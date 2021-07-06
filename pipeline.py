@@ -301,7 +301,7 @@ if __name__ == '__main__':
     compressed = monitoredfile.groupby(
         ['Position', 'variant', 'protein', 'Mutation'], as_index=False).agg(agg_dict)
 
-    compressed.to_csv("results/compressed.csv")
+    compressed.to_csv("results/compressed.csv", index=False)
 
     # Folders for the pileups
     try:
