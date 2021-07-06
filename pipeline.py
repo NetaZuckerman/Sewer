@@ -289,10 +289,15 @@ if __name__ == '__main__':
     monitoredfile.to_csv("results/monitored_mutations.csv", index=False)  # write to file  # no index
 
     # CREATE COMPRESSED TABLE
+    agg_dict = {}
+    for col in monitoredfile:
+        if col == 'lineage':
+            agg_dict[col] = ';'.join
+        else:
+            agg_dict[col] = 'first'
     compressed = monitoredfile.groupby(
-        ['Position', 'variant', 'protein', 'Mutation', 'Mutation type'])['lineage'].apply(
-        lambda x: ';'.join(x)
-    ).reset_index()
+        ['Position', 'variant', 'protein', 'Mutation', 'Mutation type']).agg(agg_dict)
+
     compressed.to_csv("results/compressed.csv")
 
     # Folders for the pileups
