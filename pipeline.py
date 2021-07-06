@@ -271,7 +271,9 @@ if __name__ == '__main__':
         pileup_table['del_freq'] = pileup_table.apply(
             lambda row: (row['del'] / row['sum']) * 100 if row['sum'] else None, axis=1)
         # add sample to table
-        file_name = os.path.basename(file).rstrip('.mapped.sorted.bam')
+        file_name = os.path.basename(file)
+        file_name = re.sub(r".mapped.sorted.bam", "", file_name)
+
         all_tables[file_name] = pileup_table
         final_df[file_name] = final_df.apply(lambda row: frequency(row['Mutation'], int(row['Position']) - 1, pileup_table, min_depth), axis=1)
 
@@ -297,7 +299,7 @@ if __name__ == '__main__':
         else:
             agg_dict[col] = 'first'
     compressed = monitoredfile.groupby(
-        ['Position', 'variant', 'protein', 'Mutation', 'Mutation type']).agg(agg_dict)
+        ['Position', 'variant', 'protein', 'Mutation']).agg(agg_dict)
 
     compressed.to_csv("results/compressed.csv")
 
