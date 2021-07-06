@@ -205,8 +205,8 @@ if __name__ == '__main__':
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
     excel_mutTable = pd.read_excel("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx", sheet_name=None,engine='openpyxl')
 
-    mutTable_copy = excel_mutTable.copy()
-    for name, frame in mutTable_copy.items():
+    for name in excel_mutTable:
+        frame = excel_mutTable[name]
         excel_mutTable[name] = frame[frame['Mutation type'].str.lower() != 'insertion']
         excel_mutTable[name]['lineage'] = name  # add a lineage column to all variant's tables
 
