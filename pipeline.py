@@ -197,6 +197,7 @@ if __name__ == '__main__':
     min_depth = int(argv[2])  # now 5, maybe change later
     refseq_path = argv[3]
     # preparations
+    bam_dir = bam_dir + '/' if not bam_dir.endswith('/') else bam_dir  # make sure path ends with '/'
     # get reference name
     refseq_name = os.path.basename(refseq_path).strip('.fasta')
     # index refseq samtools in python
