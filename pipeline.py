@@ -299,7 +299,7 @@ if __name__ == '__main__':
         else:
             agg_dict[col] = 'first'
     compressed = monitoredfile.groupby(
-        ['Position', 'variant', 'protein', 'Mutation']).agg(agg_dict)
+        ['Position', 'variant', 'protein', 'Mutation'], as_index=False).agg(agg_dict)
 
     compressed.to_csv("results/compressed.csv")
 
