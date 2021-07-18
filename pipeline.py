@@ -293,6 +293,9 @@ if __name__ == '__main__':
 
     # CREATE COMPRESSED TABLE
     agg_dict = {}
+    # create dictionary of actions per colomn in order to compress only the lineage column, and keep
+    # the first value in the rest of hte columns.
+    # like "rules" for the aggregate function.
     for col in monitoredfile:
         if col == 'lineage':
             agg_dict[col] = ';'.join
