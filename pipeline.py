@@ -207,7 +207,7 @@ if __name__ == '__main__':
 
     for name in excel_mutTable:
         frame = excel_mutTable[name]
-        excel_mutTable[name] = frame[frame['Mutation type'].apply(lambda x: 'insertion' not in x.str.lower())]
+        excel_mutTable[name] = frame[frame['Mutation type'].apply(lambda x: 'insertion' not in x.lower())]
         excel_mutTable[name]['lineage'] = name  # add a lineage column to all variant's tables
 
     # uniq_lineages = [lin.rsplit('_', 1)[0] for lin in excel_mutTable]
