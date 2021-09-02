@@ -7,12 +7,14 @@ get two tables as input and create a new one called mergedTable.csv
 """
 
 SEWER_PATH = Path('/data3/sewer')
-NEW_RUNS = ['NGS110_18082021', 'NGS111_20082021']
+new_runs = ['NGS110_18082021', 'NGS111_20082021', 'NGS113_27082021']
+
 
 
 def configure_parser():
     parser = ArgumentParser()
-    parser.add_argument('--envs',
+    parser.add_argument('--runs',
+                        help="Run NUMBER",
                         nargs='+',
                         type=str
                         )
@@ -28,6 +30,8 @@ def configure_parser():
         action='store_true',
         default=False
         )
+    
+    return parser
 
 
 def merge_monitored():
@@ -35,7 +39,7 @@ def merge_monitored():
     monitored_path = SEWER_PATH / 'monitored.xlsx'
     table1 = pd.read_excel(monitored_path, engine='openpyxl')
     
-    for run in NEW_RUNS:
+    for run in new_runs:
         run_path = SEWER_PATH / run / 'results' / 'monitored_mutations.csv'
         table2 = pd.read_csv(run_path).set_index(["Position", "Reference", "Mutation", "protein", "variant", "Mutation type", "annotation", "varname", "lineage"])
         table1 = table1.join(table2, how='outer',
@@ -57,7 +61,7 @@ def merge_surv():
     
     env_surv_df = env_surv_df.set_axis(samples_ind, axis=0)
     
-    for run in NEW_RUNS:
+    for run in new_runs:
         run_path = SEWER_PATH / run / 'results' / 'surveillance_table.csv'
         surv = pd.read_csv(run_path, index_col=0)
         samples_ind = [
@@ -78,7 +82,10 @@ def merge_surv():
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
     env_surv_df.to_excel(output_path)
 
-if __name__ == __main__:
+# if __name__ == "__main__":
+#     parser = configure_parser()
+#     args = parser.parse_args()
     
-    
+merge_monitored()
+merge_surv()
     
