@@ -80,7 +80,7 @@ def merge_surv():
         
         env_surv_df.loc[surv.index, surv.columns] = surv
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
-    env_surv_df.to_excel(output_path)
+    env_surv_df.to_excel(output_path, engine='openpyxl')
 
 # if __name__ == "__main__":
 #     parser = configure_parser()
