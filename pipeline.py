@@ -203,7 +203,7 @@ if __name__ == '__main__':
     # index refseq samtools in python
     pysam.faidx(refseq_path)
     refseq_series = pd.Series([x for x in pysam.Fastafile(refseq_path).fetch(reference=refseq_name)])
-    excel_mutTable = pd.read_excel("/data/projects/Dana/scripts/covid19/mutationsTable.xlsx", sheet_name=None,engine='openpyxl')
+    excel_mutTable = pd.read_excel("/data3/code/covid19/mutationsTable.xlsx", sheet_name=None,engine='openpyxl')
 
     for name in excel_mutTable:
         frame = excel_mutTable[name]
