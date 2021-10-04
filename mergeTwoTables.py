@@ -7,7 +7,14 @@ get two tables as input and create a new one called mergedTable.csv
 """
 
 SEWER_PATH = Path('/data3/sewer')
-new_runs = ['NGS110_18082021', 'NGS111_20082021', 'NGS113_27082021']
+new_runs = [
+    'NGS108_11082021',
+    'NGS110_18082021',
+    'NGS111_20082021', 
+    'NGS113_27082021',
+    'NGS117_15092021',
+    'NGS120_01102021'
+    ]
 
 
 
@@ -37,6 +44,7 @@ def configure_parser():
 def merge_monitored():
     print('Merging monitored variants')
     monitored_path = SEWER_PATH / 'monitored.xlsx'
+    monitored_path2 = SEWER_PATH / 'monitored2.xlsx'
     table1 = pd.read_excel(monitored_path, engine='openpyxl')
     
     for run in new_runs:
@@ -46,7 +54,9 @@ def merge_monitored():
                                on=["Position", "Reference", "Mutation", "protein", "variant", "Mutation type",
                                    "annotation", "varname", "lineage"]).fillna('X')
     
-    table1.to_csv('mergedTable.csv', index=False)
+    # table1.to_csv('mergedTable.csv', index=False)
+    with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w") as writer:
+        pd.write_excel(writer,table1)
     
 
 def merge_surv():
@@ -79,8 +89,11 @@ def merge_surv():
             surv = surv.loc[~missing_ind]
         
         env_surv_df.loc[surv.index, surv.columns] = surv
+    
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
-    env_surv_df.to_excel(output_path, engine='openpyxl')
+    
+    with pd.ExcelWriter(output_path, engine="openpyxl", mode="w") as writer:
+        pd.write_excel(writer,env_surv_df)
 
 # if __name__ == "__main__":
 #     parser = configure_parser()
