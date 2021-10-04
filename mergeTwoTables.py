@@ -75,7 +75,8 @@ def merge_monitored():
     # table1.to_csv('mergedTable.csv', index=False)
     print('Done merging; writing monitored file')
     with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
-        pd.write_excel(writer,table1)
+        table1.to_excel(excel_writer=writer)
+        # pd.write_excel(writer,table1)
     
 
 def merge_surv():
