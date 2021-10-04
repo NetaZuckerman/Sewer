@@ -284,7 +284,7 @@ if __name__ == '__main__':
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
     # creating folders
-    results_path = Path(bam_dir).parent / 'reuslts'
+    results_path = Path(bam_dir).parent / 'results'
     results_path.mkdir()
     monitoredfile = final_df.copy()
     # replacing NA's with "No Coverage" Text
