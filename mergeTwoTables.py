@@ -47,13 +47,31 @@ def merge_monitored():
     monitored_path2 = SEWER_PATH / 'monitored2.xlsx'
     table1 = pd.read_excel(monitored_path, engine='openpyxl')
     
+    index_cols = [
+        "Position", 
+        "Reference", 
+        "Mutation", 
+        "protein", 
+        "variant", 
+        "Mutation type",
+        "annotation", 
+        "varname", 
+        "lineage"
+        ]
+    
+    rsuffix = 'right_'
     for run in new_runs:
         run_path = SEWER_PATH / run / 'results' / 'monitored_mutations.csv'
-        table2 = pd.read_csv(run_path).set_index(["Position", "Reference", "Mutation", "protein", "variant", "Mutation type", "annotation", "varname", "lineage"])
-        table1 = table1.join(table2, how='outer',
-                               on=["Position", "Reference", "Mutation", "protein", "variant", "Mutation type",
-                                   "annotation", "varname", "lineage"]).fillna('X')
+        table2 = pd.read_csv(run_path).set_index(index_cols)
+        table1 = table1.join(
+            table2,
+            how='outer',
+            on=index_cols,
+            rsuffix=rsuffix
+            ).fillna('X')
     
+    cols_to_drop = list(filter(lambda col: rsuffix in col, table1.columns))
+    table1 = table1.drop(cols_to_drop, axis=1)
     # table1.to_csv('mergedTable.csv', index=False)
     print('Done merging; writing monitored file')
     with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w") as writer:
