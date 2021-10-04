@@ -55,6 +55,7 @@ def merge_monitored():
                                    "annotation", "varname", "lineage"]).fillna('X')
     
     # table1.to_csv('mergedTable.csv', index=False)
+    print('Done merging; writing monitored file')
     with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w") as writer:
         pd.write_excel(writer,table1)
     
@@ -92,6 +93,7 @@ def merge_surv():
     
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
     
+    print('Done merging; writing surveillance file')
     with pd.ExcelWriter(output_path, engine="openpyxl", mode="w") as writer:
         pd.write_excel(writer,env_surv_df)
 

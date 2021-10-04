@@ -1,4 +1,5 @@
 import pysam
+from pathlib import Path
 from collections import Counter
 import pandas as pd
 import numpy as np
@@ -283,13 +284,14 @@ if __name__ == '__main__':
     sorted_cols = [c for c in final_df.columns.values if c not in sortednames] + sortednames
     final_df = final_df.reindex(columns=sorted_cols)
     # creating folders
-    if not os.path.exists('results'):
-        os.mkdir('results/')
+    results_path = Path(bam_dir).parent / 'reuslts'
+    results_path.mkdir()
     monitoredfile = final_df.copy()
     # replacing NA's with "No Coverage" Text
     monitoredfile.fillna(-1, inplace=True)
     monitoredfile.replace(-1, "No Coverage", inplace=True)
-    monitoredfile.to_csv("results/monitored_mutations.csv", index=False)  # write to file  # no index
+    monitored_path = results_path / "monitored_mutations.csv"
+    monitoredfile.to_csv(monitored_path, index=False)  # write to file  # no index
 
     # CREATE COMPRESSED TABLE
     agg_dict = {}
@@ -303,34 +305,53 @@ if __name__ == '__main__':
             agg_dict[col] = 'first'
     compressed = monitoredfile.groupby(
         ['Position', 'variant', 'protein', 'Mutation'], as_index=False).agg(agg_dict)
+    
+    compressed_path = results_path / "compressed.csv"
+    compressed.to_csv(compressed_path, index=False)
 
-    compressed.to_csv("results/compressed.csv", index=False)
 
+
+    mutationsPileups_path = results_path / "mutationsPileups_path"
+    mutationsPileups_path.mkdir()
+    
+    fullPileups_path = results_path / "fullPileups"
+    fullPileups_path.mkdir()
+    
     # Folders for the pileups
-    try:
-        os.makedirs('results/mutationsPileups')
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            print("directory results/mutationsPileups already exists, continuing.")
-        else:
-            raise
-    try:
-        os.makedirs('results/fullPileups')
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            print("directory results/mutationsPileups already exists, continuing.")
-        else:
-            raise
+    # try:
+    #     os.makedirs('results/mutationsPileups')
+    # except OSError as e:
+    #     if e.errno == errno.EEXIST:
+    #         print("directory results/mutationsPileups already exists, continuing.")
+    #     else:
+    #         raise
+    # try:
+    #     os.makedirs('results/fullPileups')
+    # except OSError as e:
+    #     if e.errno == errno.EEXIST:
+    #         print("directory results/mutationsPileups already exists, continuing.")
+    #     else:
+    #         raise
+    
+    
+    
+    
+    
     # write pileup files that contain only positions mutations
     for name, table in all_tables.items():
         # keep only lines that: >1% frequency of non refseq mutation AND >=10 depth (line.sum) # TODO: change to parameter given by user instead of 10
         table['N_freq'] = table.apply(lambda row: (row['N'] / row['sum']) * 100 if row['sum'] else 0.0, axis=1)
         table = table.dropna(thresh=5)  # ?? TODO: try with other thresholds \ per nucleotide
-        table.to_csv('results/fullPileups/' + name + '.csv')  # write to file
+        
+        table_fname = name + '.csv'
+        table_path = fullPileups_path / table_fname
+        table.to_csv(table_path)  # write to file
         indexNames = table[(table['sum'] < 10) | (table['ref_freq'] > 99) | (table['N_freq'] > 99)].index  # TODO change to parameters
         table = table.drop(index=indexNames, columns=['N_freq']) # remove n_frequency column
         table.reset_index(level=0, inplace=True)
-        table.to_csv('results/mutationsPileups/' + name + '.csv', index=False) # write to file
+        table_fname = name + '.csv'
+        table_path = mutationsPileups_path / table_fname
+        table.to_csv(table_path, index=False) # write to file
 
     # Start Handling the surveillance_table.csv
     no_uk_lineage_freq, no_uk_lineage_avg, no_uk_lineage_std, no_uk_zero, no_uk_na = no_uk_calculate(final_df.copy(),
@@ -370,6 +391,7 @@ if __name__ == '__main__':
     surv_table['B.1.1.7 avg'] = uk_lineage_avg
     surv_table['B.1.1.7 freq'] = uk_lineage_freq
     addVerdict(surv_table)
-    surv_table.to_csv('results/surveillance_table.csv')
+    surv_path = results_path / 'surveillance_table.csv'
+    surv_table.to_csv(surv_path)
 
 
