@@ -82,7 +82,7 @@ def merge_monitored():
 def merge_surv():
     print('Merging surveillanced variants')
     env_surv_path = SEWER_PATH / 'EnvSurv_excel.xlsx'
-    env_surv_df = pd.read_excel(env_surv_path, engine='openpyxl', mode="w", if_sheet_exists='replace')
+    env_surv_df = pd.read_excel(env_surv_path, engine='openpyxl')
     samples_ind = [
         num[0] for num in env_surv_df['sample number'] 
             .str.strip()
@@ -113,8 +113,9 @@ def merge_surv():
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
     
     print('Done merging; writing surveillance file')
-    with pd.ExcelWriter(output_path, engine="openpyxl", mode="w") as writer:
-        pd.write_excel(writer,env_surv_df)
+    with pd.ExcelWriter(output_path, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
+        env_surv_df.to_excel(excel_writer=writer)
+        # pd.write_excel(writer,env_surv_df)
 
 # if __name__ == "__main__":
 #     parser = configure_parser()
