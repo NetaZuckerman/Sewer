@@ -74,14 +74,14 @@ def merge_monitored():
     table1 = table1.drop(cols_to_drop, axis=1)
     # table1.to_csv('mergedTable.csv', index=False)
     print('Done merging; writing monitored file')
-    with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w") as writer:
+    with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
         pd.write_excel(writer,table1)
     
 
 def merge_surv():
     print('Merging surveillanced variants')
     env_surv_path = SEWER_PATH / 'EnvSurv_excel.xlsx'
-    env_surv_df = pd.read_excel(env_surv_path, engine='openpyxl')
+    env_surv_df = pd.read_excel(env_surv_path, engine='openpyxl', mode="w", if_sheet_exists='replace')
     samples_ind = [
         num[0] for num in env_surv_df['sample number'] 
             .str.strip()
