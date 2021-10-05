@@ -12,6 +12,7 @@ new_runs = [
     'NGS110_18082021',
     'NGS111_20082021', 
     'NGS113_27082021',
+    'NGS115_03092021',
     'NGS117_15092021',
     'NGS120_01102021'
     ]
@@ -44,7 +45,6 @@ def configure_parser():
 def merge_monitored():
     print('Merging monitored variants')
     monitored_path = SEWER_PATH / 'monitored.xlsx'
-    monitored_path2 = SEWER_PATH / 'monitored2.xlsx'
     table1 = pd.read_excel(monitored_path, engine='openpyxl')
     
     index_cols = [
@@ -74,7 +74,7 @@ def merge_monitored():
     table1 = table1.drop(cols_to_drop, axis=1)
     # table1.to_csv('mergedTable.csv', index=False)
     print('Done merging; writing monitored file')
-    with pd.ExcelWriter(monitored_path2, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
+    with pd.ExcelWriter(monitored_path, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
         table1.to_excel(excel_writer=writer)
         # pd.write_excel(writer,table1)
     
@@ -113,7 +113,7 @@ def merge_surv():
     output_path = SEWER_PATH / 'updated_envsurv.xlsx'
     
     print('Done merging; writing surveillance file')
-    with pd.ExcelWriter(output_path, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
+    with pd.ExcelWriter(env_surv_path, engine="openpyxl", mode="w", if_sheet_exists='replace') as writer:
         env_surv_df.to_excel(excel_writer=writer)
         # pd.write_excel(writer,env_surv_df)
 
